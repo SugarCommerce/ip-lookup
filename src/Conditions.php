@@ -20,7 +20,6 @@ use SugarCommerce\Geo\Countries;
 use SugarCommerce\IpLookup\Providers\AbuseIPDB;
 use SugarCommerce\IpLookup\Providers\IPInfo;
 use SugarCommerce\IpLookup\Providers\IPQualityScore;
-use SugarCommerce\IpLookup\Providers\MinFraud;
 use SugarCommerce\IpLookup\Providers\ProxyCheck;
 use SugarCommerce\IpLookup\Providers\ProxyCheck\Response\IP as ProxyCheckIP;
 use WP_Error;
@@ -94,7 +93,6 @@ final class Conditions {
 			$provider instanceof IPQualityScore => self::ipqualityscore( $provider ),
 			$provider instanceof IPInfo         => self::ipinfo( $provider ),
 			$provider instanceof AbuseIPDB      => self::abuseipdb( $provider ),
-			$provider instanceof MinFraud       => self::minfraud( $provider ),
 			default                             => self::common( $provider ),
 		};
 	}
@@ -329,29 +327,6 @@ final class Conditions {
 			'abuseipdb_country'          => self::country( $group, fn ( $args ) => $check( $args )?->get_country_code() ),
 			'abuseipdb_is_tor'           => self::boolean( $group, __( 'Tor', 'sugarcommerce' ), __( 'Yes when AbuseIPDB lists the address as a Tor exit node.', 'sugarcommerce' ), fn ( $args ) => $check( $args )?->is_tor() ),
 			'abuseipdb_is_whitelisted'   => self::boolean( $group, __( 'Public Allowlist', 'sugarcommerce' ), __( 'Yes when the address is on AbuseIPDB\'s allowlist -- Google, Cloudflare and the like. "Is no" keeps a rule off their crawlers.', 'sugarcommerce' ), fn ( $args ) => $check( $args )?->is_whitelisted() ),
-		);
-	}
-
-	/**
-	 * minFraud's condition.
-	 *
-	 * @param MinFraud $client The client.
-	 *
-	 * @return array<string, array>
-	 */
-	private static function minfraud( MinFraud $client ): array {
-		return array(
-			'minfraud_ip_risk' => self::number(
-				__( 'minFraud', 'sugarcommerce' ),
-				__( 'IP Risk', 'sugarcommerce' ),
-				__( 'MaxMind\'s risk for the address on its own, 0.01 to 99.', 'sugarcommerce' ),
-				function ( array $args ) use ( $client ): ?int {
-					$result = self::result( $client, $args );
-
-					return $result?->get_risk_score();
-				},
-				20
-			),
 		);
 	}
 

@@ -221,52 +221,6 @@ final class ProxyCheckTest extends TestCase {
 	}
 
 	/**
-	 * The dashboard needs a key, caches its exports unless forced, and
-	 * reads and changes the lists.
-	 *
-	 * @return void
-	 */
-	public function test_dashboard(): void {
-		$this->assertSame( 'proxycheck_missing_key', ( new ProxyCheck() )->get_usage()->get_error_code() );
-		$this->assertSame( 0, ( new ProxyCheck() )->get_used_tokens() );
-
-		$usage = array(
-			'Queries Today'    => '250',
-			'Daily Limit'      => '1000',
-			'Queries Total'    => '9000',
-			'Plan Tier'        => 'Free',
-			'Burst Tokens Available' => 2,
-			'Burst Token Allowance'  => 5,
-		);
-		FakeHttp::json( $usage );
-		FakeHttp::json( $usage );
-		$client = new ProxyCheck( 'k' );
-
-		$this->assertSame( 250, $client->get_used_tokens() );
-		$this->assertSame( 1000, $client->get_token_limit() );
-		$this->assertSame( 25.0, $client->get_usage_percentage() );
-		$this->assertFalse( $client->is_token_limit_exceeded() );
-		$this->assertSame( 1, FakeHttp::count() );
-		$client->get_usage( true );
-		$this->assertSame( 2, FakeHttp::count() );
-
-		FakeHttp::json( array( 'status' => 'denied', 'message' => 'Dashboard API access is off.' ) );
-		$this->assertSame( 'proxycheck_api_access_denied', $client->get_blacklist()->get_error_code() );
-		$this->assertStringStartsWith( 'https://proxycheck.io/dashboard/blacklist/list/?json=1&key=k', FakeHttp::last()['url'] );
-
-		FakeHttp::json( array( 'status' => 'ok' ) );
-		$client->add_to_blacklist( array( ' 8.8.8.8 ', '', '1.1.1.1' ) );
-		$this->assertSame( 'POST', FakeHttp::last()['method'] );
-		$this->assertSame( "8.8.8.8\n1.1.1.1", FakeHttp::last()['args']['body']['data'] );
-
-		FakeHttp::json( array( 'status' => 'ok' ) );
-		$client->get_cors_origins();
-		$this->assertStringStartsWith( 'https://proxycheck.io/dashboard/cors/list/', FakeHttp::last()['url'] );
-		$this->assertSame( 'proxycheck_invalid_action', $client->manage_list( 'drop', 'whitelist' )->get_error_code() );
-		$this->assertSame( 'proxycheck_invalid_list', $client->manage_list( 'print', '../x' )->get_error_code() );
-	}
-
-	/**
 	 * The common answer asks with the VPN operator, the network and the
 	 * risk on.
 	 *

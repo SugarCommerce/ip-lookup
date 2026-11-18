@@ -7,7 +7,7 @@ HTTP API answers from a queue (`Support/FakeHttp.php`) that also records
 every request, so a test can say exactly what was sent and how often.
 
 - **ResultTest** -- the common answer: cleaning, ASNs, and null as no answer.
-- **ServiceTest** -- the cache, failures remembered and forgotten, keys kept
+- **ServiceTest** -- network's `Remote\Service` through AbuseIPDB: the cache, failures remembered and forgotten, keys kept
   apart, and addresses refused before any request.
 - **Providers/** -- each service's endpoints, URLs, refusals and common answer.
 - **LookupTest** -- falling back, asking all, once per request.

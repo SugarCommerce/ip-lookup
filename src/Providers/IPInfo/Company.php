@@ -12,7 +12,7 @@ declare( strict_types=1 );
 
 namespace SugarCommerce\IpLookup\Providers\IPInfo;
 
-use SugarCommerce\IpLookup\Response;
+use SugarCommerce\Network\Remote\Response;
 
 /**
  * Class Company

@@ -12,11 +12,11 @@ declare( strict_types=1 );
 
 namespace SugarCommerce\IpLookup\Providers;
 
-use SugarCommerce\IpLookup\Providers\ProxyCheck\Dashboard;
 use SugarCommerce\IpLookup\Providers\ProxyCheck\Response\DisposableEmail;
 use SugarCommerce\IpLookup\Providers\ProxyCheck\Response\IP;
 use SugarCommerce\IpLookup\Result;
-use SugarCommerce\IpLookup\Service;
+use SugarCommerce\IpLookup\Provider;
+use SugarCommerce\Network\Remote\Service;
 use WP_Error;
 
 /**
@@ -32,12 +32,13 @@ use WP_Error;
  *
  * @since 1.0.0
  */
-class ProxyCheck extends Service {
-	use Dashboard;
+class ProxyCheck extends Service implements Provider {
 
 	protected const ID = 'proxycheck';
 
 	protected const NAME = 'ProxyCheck';
+
+	protected const CACHE_GROUP = 'iplookup';
 
 	protected const CACHE_TTL = 600;
 
@@ -678,8 +679,7 @@ class ProxyCheck extends Service {
 	 * Read an answer: ProxyCheck says what went wrong in `status` and
 	 * `message`.
 	 *
-	 * `denied` is a refusal too -- an exhausted allowance, a dashboard API
-	 * not switched on -- while `warning` comes with an answer and is kept.
+	 * `denied` is a refusal too -- an exhausted allowance -- while `warning` comes with an answer and is kept.
 	 *
 	 * @param array|WP_Error $response What request() returned.
 	 *

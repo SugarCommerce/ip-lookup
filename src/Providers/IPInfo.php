@@ -14,7 +14,8 @@ namespace SugarCommerce\IpLookup\Providers;
 
 use SugarCommerce\IpLookup\Providers\IPInfo\Response;
 use SugarCommerce\IpLookup\Result;
-use SugarCommerce\IpLookup\Service;
+use SugarCommerce\IpLookup\Provider;
+use SugarCommerce\Network\Remote\Service;
 use WP_Error;
 
 /**
@@ -26,11 +27,13 @@ use WP_Error;
  *
  * @since 1.0.0
  */
-class IPInfo extends Service {
+class IPInfo extends Service implements Provider {
 
 	protected const ID = 'ipinfo';
 
 	protected const NAME = 'IPinfo';
+
+	protected const CACHE_GROUP = 'iplookup';
 
 	/**
 	 * The API.
@@ -127,9 +130,8 @@ class IPInfo extends Service {
 					continue;
 				}
 
-				if ( $this->is_cache_enabled() ) {
-					set_transient( $this->cache_key( (string) $ip ), array( 'answer' => $data ), $this->get_cache_ttl() );
-				}
+				// Kept as a single lookup would have kept it; none was cached.
+				$this->remember( (string) $ip, static fn () => $data );
 
 				$results[ (string) $ip ] = new Response( $data );
 			}

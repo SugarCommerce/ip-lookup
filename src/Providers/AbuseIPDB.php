@@ -14,7 +14,8 @@ namespace SugarCommerce\IpLookup\Providers;
 
 use SugarCommerce\IpLookup\Providers\AbuseIPDB\Check;
 use SugarCommerce\IpLookup\Result;
-use SugarCommerce\IpLookup\Service;
+use SugarCommerce\IpLookup\Provider;
+use SugarCommerce\Network\Remote\Service;
 use WP_Error;
 
 /**
@@ -29,11 +30,13 @@ use WP_Error;
  *
  * @since 1.0.0
  */
-class AbuseIPDB extends Service {
+class AbuseIPDB extends Service implements Provider {
 
 	protected const ID = 'abuseipdb';
 
 	protected const NAME = 'AbuseIPDB';
+
+	protected const CACHE_GROUP = 'iplookup';
 
 	/**
 	 * The Check endpoint.

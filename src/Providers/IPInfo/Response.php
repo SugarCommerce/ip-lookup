@@ -13,7 +13,7 @@ declare( strict_types=1 );
 namespace SugarCommerce\IpLookup\Providers\IPInfo;
 
 use SugarCommerce\Geo\Countries;
-use SugarCommerce\IpLookup\Response as Base;
+use SugarCommerce\Network\Remote\Response as Base;
 
 /**
  * Class Response

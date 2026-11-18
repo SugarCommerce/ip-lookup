@@ -17,7 +17,6 @@ use SugarCommerce\IpLookup\Provider;
 use SugarCommerce\IpLookup\Providers\AbuseIPDB;
 use SugarCommerce\IpLookup\Providers\IPInfo;
 use SugarCommerce\IpLookup\Providers\IPQualityScore;
-use SugarCommerce\IpLookup\Providers\MinFraud;
 use SugarCommerce\IpLookup\Providers\ProxyCheck;
 use SugarCommerce\IpLookup\Result;
 use SugarCommerce\IpLookup\Tests\Support\FakeHttp;
@@ -62,7 +61,6 @@ final class ConditionsTest extends TestCase {
 		sort( $old );
 		sort( $ids );
 		$this->assertSame( $old, $ids );
-		$this->assertSame( array( 'minfraud_ip_risk' ), array_keys( Conditions::definitions( new MinFraud( 'a', 'k' ) ) ) );
 	}
 
 	/**

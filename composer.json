@@ -1,6 +1,6 @@
 {
     "name": "sugarcommerce/ip-lookup",
-    "description": "Ask AbuseIPDB, IPinfo, IPQualityScore, ProxyCheck or MaxMind minFraud about an IP address from WordPress and get one answer whichever you use: risk, proxy, VPN, Tor, hosting, country and network, cached, with failures remembered, and conditions a shop owner can build rules on.",
+    "description": "Ask AbuseIPDB, IPinfo, IPQualityScore or ProxyCheck about an IP address from WordPress and get one answer whichever you use: risk, proxy, VPN, Tor, hosting, country and network, cached, with failures remembered, and conditions a shop owner can build rules on.",
     "homepage": "https://github.com/SugarCommerce/ip-lookup",
     "type": "library",
     "license": "GPL-2.0-or-later",
@@ -19,8 +19,7 @@
         "abuseipdb",
         "ipinfo",
         "ipqualityscore",
-        "proxycheck",
-        "minfraud"
+        "proxycheck"
     ],
     "require": {
         "php": ">=8.3",
@@ -54,6 +53,13 @@
         },
         {
             "type": "path",
+            "url": "../plugin",
+            "options": {
+                "symlink": false
+            }
+        },
+        {
+            "type": "path",
             "url": "../conditions",
             "options": {
                 "symlink": false
@@ -81,7 +87,7 @@
             "dealerdirect/phpcodesniffer-composer-installer": true
         }
     },
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "prefer-stable": true,
     "scripts": {
         "test": "phpunit",
