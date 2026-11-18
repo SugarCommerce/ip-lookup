@@ -34,6 +34,15 @@ $GLOBALS['ipl_transients'] = array();
 $GLOBALS['ipl_now']        = 1_800_000_000;
 
 /**
+ * Options, and whether transients live in a persistent object cache
+ * rather than the options table (so a LIKE over the table finds none).
+ *
+ * @var array<string, mixed>
+ */
+$GLOBALS['ipl_options']      = array();
+$GLOBALS['ipl_object_cache'] = false;
+
+/**
  * Forget every transient and queued answer.
  *
  * @return void
@@ -41,6 +50,8 @@ $GLOBALS['ipl_now']        = 1_800_000_000;
 function ipl_reset(): void {
 	$GLOBALS['ipl_transients'] = array();
 	$GLOBALS['ipl_now']        = 1_800_000_000;
+	$GLOBALS['ipl_options']      = array();
+	$GLOBALS['ipl_object_cache'] = false;
 	$_SERVER                   = array();
 	FakeHttp::reset();
 }
@@ -264,6 +275,29 @@ function apply_filters( $hook, $value ) {
 function do_action( ...$args ) {}
 
 /**
+ * @param string $name    Option.
+ * @param mixed  $default Fallback.
+ *
+ * @return mixed
+ */
+function get_option( $name, $default = false ) {
+	return array_key_exists( $name, $GLOBALS['ipl_options'] ) ? $GLOBALS['ipl_options'][ $name ] : $default;
+}
+
+/**
+ * @param string    $name     Option.
+ * @param mixed     $value    Value.
+ * @param bool|null $autoload Autoload.
+ *
+ * @return bool
+ */
+function update_option( $name, $value, $autoload = null ) {
+	$GLOBALS['ipl_options'][ $name ] = $value;
+
+	return true;
+}
+
+/**
  * @param string $key Key.
  *
  * @return mixed
@@ -389,6 +423,10 @@ $GLOBALS['wpdb'] = new class() {
 	public function get_col( $like ) {
 		$prefix = stripslashes( substr( $like, 0, -1 ) );
 		$names  = array();
+
+		if ( $GLOBALS['ipl_object_cache'] ) {
+			return $names;
+		}
 
 		foreach ( array_keys( $GLOBALS['ipl_transients'] ) as $key ) {
 			if ( str_starts_with( '_transient_' . $key, $prefix ) ) {

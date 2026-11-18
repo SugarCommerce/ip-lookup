@@ -251,13 +251,25 @@ abstract class Service implements Provider {
 			return (bool) delete_transient( $key );
 		}
 
+		/*
+		 * Start a new generation of keys, so nothing kept before is found
+		 * again. With a persistent object cache the transients are not in
+		 * the options table at all, so finding them by name (below) finds
+		 * nothing -- the old answers would have kept being served until
+		 * they expired. The orphaned entries expire on their own.
+		 */
+		update_option( $this->generation_option(), $this->generation() + 1, true );
+
 		global $wpdb;
 
 		if ( ! isset( $wpdb ) ) {
-			return false;
+			return true;
 		}
 
 		/*
+		 * Without an object cache, tidy the old rows away now rather than
+		 * leave them for the expired-transient cleanup.
+		 *
 		 * Find the names, then let delete_transient() do the deleting.
 		 *
 		 * Deleting the rows directly leaves every _transient_timeout_* row
@@ -354,7 +366,30 @@ abstract class Service implements Provider {
 	 * @return string
 	 */
 	protected function cache_key( string $identifier ): string {
-		return $this->cache_prefix() . md5( $identifier . '|' . $this->api_key );
+		$generation = $this->generation();
+
+		return $this->cache_prefix() . ( $generation > 0 ? $generation . '_' : '' ) . md5( $identifier . '|' . $this->api_key );
+	}
+
+	/**
+	 * How many times every answer has been cleared: part of each key, so
+	 * clearing everything works whether or not the transients live in the
+	 * options table.
+	 *
+	 * @return int 0 until the first clear_cache(), so keys made before then
+	 *             still match.
+	 */
+	private function generation(): int {
+		return max( 0, (int) get_option( $this->generation_option(), 0 ) );
+	}
+
+	/**
+	 * The option holding the generation.
+	 *
+	 * @return string
+	 */
+	private function generation_option(): string {
+		return $this->cache_prefix() . 'generation';
 	}
 
 	/**

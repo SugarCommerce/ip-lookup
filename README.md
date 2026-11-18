@@ -82,7 +82,9 @@ new MinFraud( $account_id, $licence_key );
 ```
 
 `clear_cache( $what )` forgets one answer, `clear_cache()` every answer that
-client kept. Errors are `WP_Error`s whose codes start with the provider's
+provider kept -- with a persistent object cache too, where the answers are
+not in the options table: it starts a new generation of cache keys (an
+option named `iplookup_{id}_generation`), so nothing kept before is found again. Errors are `WP_Error`s whose codes start with the provider's
 id: `proxycheck_api_error`, `ipinfo_invalid_ip`, `abuseipdb_recent_failure`.
 
 ## The common answer
