@@ -12,6 +12,7 @@ declare( strict_types=1 );
 
 namespace SugarCommerce\IpLookup\Providers\IPQualityScore\Response;
 
+use SugarCommerce\IpLookup\Support\Field;
 use SugarCommerce\Network\Remote\Response;
 
 /**
@@ -43,7 +44,7 @@ abstract class Base extends Response {
 	 * @return string|null
 	 */
 	public function get_request_id(): ?string {
-		return isset( $this->data['request_id'] ) ? (string) $this->data['request_id'] : null;
+		return Field::text( $this->data['request_id'] ?? null );
 	}
 
 	/**
@@ -54,7 +55,7 @@ abstract class Base extends Response {
 	 * @return string|null
 	 */
 	public function get_message(): ?string {
-		return isset( $this->data['message'] ) && is_scalar( $this->data['message'] ) ? (string) $this->data['message'] : null;
+		return Field::text( $this->data['message'] ?? null );
 	}
 
 	/**

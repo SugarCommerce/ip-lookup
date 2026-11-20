@@ -203,8 +203,7 @@ class ProxyCheck extends Service implements Provider {
 		$country     = $check->get_country();
 		$continent   = $check->get_continent();
 		$coordinates = $check->get_coordinates();
-		$raw         = $check->to_array()[ trim( $ip ) ] ?? array();
-		$network     = is_array( $raw['network']['type'] ?? null ) ? null : ( $raw['network']['type'] ?? null );
+		$network     = $check->get_network_type();
 
 		return new Result(
 			self::ID,
@@ -214,7 +213,7 @@ class ProxyCheck extends Service implements Provider {
 				'is_proxy'        => $check->is_proxy(),
 				'is_vpn'          => $check->is_proxy() ? 'VPN' === $type : false,
 				'is_tor'          => $check->is_proxy() ? 'TOR' === $type : false,
-				'is_hosting'      => null === $network ? null : 'hosting' === strtolower( (string) $network ),
+				'is_hosting'      => null === $network ? null : 'hosting' === strtolower( $network ),
 				'country_code'    => $country['code'] ?? null,
 				'is_eu'           => null === $country ? null : $country['is_eu'],
 				'continent_code'  => $continent['code'] ?? null,

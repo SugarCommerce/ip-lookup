@@ -12,6 +12,8 @@ declare( strict_types=1 );
 
 namespace SugarCommerce\IpLookup\Providers\IPQualityScore\Response;
 
+use SugarCommerce\IpLookup\Support\Field;
+
 /**
  * Email Response Class
  *
@@ -53,7 +55,7 @@ class Email extends Base {
 	 * @return string|null
 	 */
 	public function get_first_name(): ?string {
-		return $this->data['first_name'] ?? null;
+		return Field::text( $this->data['first_name'] ?? null );
 	}
 
 	/**
@@ -62,7 +64,7 @@ class Email extends Base {
 	 * @return string|null
 	 */
 	public function get_deliverability(): ?string {
-		return $this->data['deliverability'] ?? null;
+		return Field::text( $this->data['deliverability'] ?? null );
 	}
 
 	/**
@@ -71,7 +73,7 @@ class Email extends Base {
 	 * @return int|null
 	 */
 	public function get_smtp_score(): ?int {
-		return isset( $this->data['smtp_score'] ) ? (int) $this->data['smtp_score'] : null;
+		return Field::int( $this->data['smtp_score'] ?? null );
 	}
 
 	/**
@@ -80,7 +82,7 @@ class Email extends Base {
 	 * @return int|null
 	 */
 	public function get_overall_score(): ?int {
-		return isset( $this->data['overall_score'] ) ? (int) $this->data['overall_score'] : null;
+		return Field::int( $this->data['overall_score'] ?? null );
 	}
 
 	/**
@@ -161,7 +163,7 @@ class Email extends Base {
 	 * @return int|null
 	 */
 	public function get_fraud_score(): ?int {
-		return isset( $this->data['fraud_score'] ) ? (int) $this->data['fraud_score'] : null;
+		return Field::int( $this->data['fraud_score'] ?? null );
 	}
 
 	/**
@@ -179,7 +181,7 @@ class Email extends Base {
 	 * @return string|null
 	 */
 	public function get_suggested_domain(): ?string {
-		return $this->data['suggested_domain'] ?? null;
+		return Field::text( $this->data['suggested_domain'] ?? null );
 	}
 
 	/**
@@ -188,7 +190,7 @@ class Email extends Base {
 	 * @return string|null
 	 */
 	public function get_domain_velocity(): ?string {
-		return $this->data['domain_velocity'] ?? null;
+		return Field::text( $this->data['domain_velocity'] ?? null );
 	}
 
 	/**
@@ -197,7 +199,7 @@ class Email extends Base {
 	 * @return string|null
 	 */
 	public function get_domain_trust(): ?string {
-		return $this->data['domain_trust'] ?? null;
+		return Field::text( $this->data['domain_trust'] ?? null );
 	}
 
 	/**
@@ -206,7 +208,7 @@ class Email extends Base {
 	 * @return string|null
 	 */
 	public function get_user_activity(): ?string {
-		return $this->data['user_activity'] ?? null;
+		return Field::text( $this->data['user_activity'] ?? null );
 	}
 
 	/**
@@ -215,7 +217,7 @@ class Email extends Base {
 	 * @return array
 	 */
 	public function get_associated_names(): array {
-		return $this->data['associated_names'] ?? [];
+		return Field::map( $this->data['associated_names'] ?? null ) ?? [];
 	}
 
 	/**
@@ -224,7 +226,7 @@ class Email extends Base {
 	 * @return array
 	 */
 	public function get_associated_phone_numbers(): array {
-		return $this->data['associated_phone_numbers'] ?? [];
+		return Field::map( $this->data['associated_phone_numbers'] ?? null ) ?? [];
 	}
 
 	/**
@@ -233,7 +235,7 @@ class Email extends Base {
 	 * @return array|null Returns array with 'human', 'timestamp', and 'iso' keys
 	 */
 	public function get_first_seen(): ?array {
-		return $this->data['first_seen'] ?? null;
+		return Field::map( $this->data['first_seen'] ?? null );
 	}
 
 	/**
@@ -242,7 +244,7 @@ class Email extends Base {
 	 * @return array|null Returns array with 'human', 'timestamp', and 'iso' keys
 	 */
 	public function get_domain_age(): ?array {
-		return $this->data['domain_age'] ?? null;
+		return Field::map( $this->data['domain_age'] ?? null );
 	}
 
 	/**
@@ -251,7 +253,7 @@ class Email extends Base {
 	 * @return string|null
 	 */
 	public function get_spam_trap_score(): ?string {
-		return $this->data['spam_trap_score'] ?? null;
+		return Field::text( $this->data['spam_trap_score'] ?? null );
 	}
 
 	/**
@@ -287,7 +289,7 @@ class Email extends Base {
 	 * @return string|null
 	 */
 	public function get_sanitized_email(): ?string {
-		return $this->data['sanitized_email'] ?? null;
+		return Field::text( $this->data['sanitized_email'] ?? null );
 	}
 
 	/**
@@ -296,7 +298,7 @@ class Email extends Base {
 	 * @return array
 	 */
 	public function get_mx_records(): array {
-		return $this->data['mx_records'] ?? [];
+		return Field::map( $this->data['mx_records'] ?? null ) ?? [];
 	}
 
 	/**
@@ -305,6 +307,6 @@ class Email extends Base {
 	 * @return array
 	 */
 	public function get_a_records(): array {
-		return $this->data['a_records'] ?? [];
+		return Field::map( $this->data['a_records'] ?? null ) ?? [];
 	}
 }

@@ -12,6 +12,7 @@ declare( strict_types=1 );
 
 namespace SugarCommerce\IpLookup\Providers\ProxyCheck\Response;
 
+use SugarCommerce\IpLookup\Support\Field;
 use SugarCommerce\IpLookup\Traits\ProxyCheckIP\Formatted;
 use SugarCommerce\IpLookup\Traits\ProxyCheckIP\MapLinks;
 
@@ -48,7 +49,7 @@ class IP extends Base {
 	 * @return bool
 	 */
 	public function is_proxy(): bool {
-		return ( $this->data[ $this->identifier ]['proxy'] ?? null ) === 'yes';
+		return 'yes' === ( $this->entry()['proxy'] ?? null );
 	}
 
 	/**
@@ -57,7 +58,7 @@ class IP extends Base {
 	 * @return string|null
 	 */
 	public function get_type(): ?string {
-		return $this->data[ $this->identifier ]['type'] ?? null;
+		return $this->entry_text( 'type' );
 	}
 
 	/**
@@ -66,7 +67,7 @@ class IP extends Base {
 	 * @return string|null
 	 */
 	public function get_provider(): ?string {
-		return $this->data[ $this->identifier ]['provider'] ?? null;
+		return $this->entry_text( 'provider' );
 	}
 
 	/**
@@ -75,7 +76,7 @@ class IP extends Base {
 	 * @return string|null
 	 */
 	public function get_organisation(): ?string {
-		return $this->data[ $this->identifier ]['organisation'] ?? null;
+		return $this->entry_text( 'organisation' );
 	}
 
 	/**
@@ -84,7 +85,19 @@ class IP extends Base {
 	 * @return int|null
 	 */
 	public function get_risk_score(): ?int {
-		return isset( $this->data[ $this->identifier ]['risk'] ) ? (int) $this->data[ $this->identifier ]['risk'] : null;
+		return Field::int( $this->entry()['risk'] ?? null );
+	}
+
+	/**
+	 * The connection underneath: `Hosting`, `Residential`, `Mobile`,
+	 * `Business`. Asked for with the network flag.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string|null
+	 */
+	public function get_network_type(): ?string {
+		return Field::text( Field::map( $this->entry()['network'] ?? null )['type'] ?? null );
 	}
 
 	/**
@@ -93,7 +106,7 @@ class IP extends Base {
 	 * @return string|null
 	 */
 	public function get_hostname(): ?string {
-		return $this->data[ $this->identifier ]['hostname'] ?? null;
+		return $this->entry_text( 'hostname' );
 	}
 
 	/**
@@ -102,7 +115,7 @@ class IP extends Base {
 	 * @return string|null
 	 */
 	public function get_range(): ?string {
-		return $this->data[ $this->identifier ]['range'] ?? null;
+		return $this->entry_text( 'range' );
 	}
 
 	/**
@@ -111,7 +124,7 @@ class IP extends Base {
 	 * @return string|null
 	 */
 	public function get_asn(): ?string {
-		return $this->data[ $this->identifier ]['asn'] ?? null;
+		return $this->entry_text( 'asn' );
 	}
 
 	/**
@@ -120,13 +133,15 @@ class IP extends Base {
 	 * @return array|null
 	 */
 	public function get_devices(): ?array {
-		if ( ! isset( $this->data[ $this->identifier ]['devices'] ) ) {
+		$devices = Field::map( $this->entry()['devices'] ?? null );
+
+		if ( null === $devices ) {
 			return null;
 		}
 
 		return [
-			'address' => (int) ( $this->data[ $this->identifier ]['devices']['address'] ?? 0 ),
-			'subnet'  => (int) ( $this->data[ $this->identifier ]['devices']['subnet'] ?? 0 ),
+			'address' => Field::int( $devices['address'] ?? null ) ?? 0,
+			'subnet'  => Field::int( $devices['subnet'] ?? null ) ?? 0,
 		];
 	}
 
@@ -149,8 +164,10 @@ class IP extends Base {
 		];
 
 		foreach ( $attack_types as $type ) {
-			if ( isset( $this->data[ $this->identifier ][ $type ] ) ) {
-				$history[ $type ] = (int) $this->data[ $this->identifier ][ $type ];
+			$count = Field::int( $this->entry()[ $type ] ?? null );
+
+			if ( null !== $count ) {
+				$history[ $type ] = $count;
 			}
 		}
 
@@ -163,7 +180,7 @@ class IP extends Base {
 	 * @return int|null
 	 */
 	public function get_port(): ?int {
-		return isset( $this->data[ $this->identifier ]['port'] ) ? (int) $this->data[ $this->identifier ]['port'] : null;
+		return Field::int( $this->entry()['port'] ?? null );
 	}
 
 	/**
@@ -172,7 +189,7 @@ class IP extends Base {
 	 * @return string|null
 	 */
 	public function get_last_seen(): ?string {
-		return $this->data[ $this->identifier ]['seen'] ?? null;
+		return $this->entry_text( 'seen' );
 	}
 
 	/**
@@ -183,12 +200,12 @@ class IP extends Base {
 	public function get_operator(): ?array {
 		$operator = [];
 
-		if ( isset( $this->data[ $this->identifier ]['provider'] ) ) {
-			$operator['name'] = $this->data[ $this->identifier ]['provider'];
+		if ( null !== $this->get_provider() ) {
+			$operator['name'] = $this->get_provider();
 		}
 
-		if ( isset( $this->data[ $this->identifier ]['asn'] ) ) {
-			$operator['asn'] = $this->data[ $this->identifier ]['asn'];
+		if ( null !== $this->get_asn() ) {
+			$operator['asn'] = $this->get_asn();
 		}
 
 		return ! empty( $operator ) ? $operator : null;
@@ -200,13 +217,13 @@ class IP extends Base {
 	 * @return array|null
 	 */
 	public function get_continent(): ?array {
-		if ( ! isset( $this->data[ $this->identifier ]['continent'] ) ) {
+		if ( null === $this->entry_text( 'continent' ) ) {
 			return null;
 		}
 
 		return [
-			'name' => $this->data[ $this->identifier ]['continent'] ?? null,
-			'code' => $this->data[ $this->identifier ]['continentcode'] ?? null,
+			'name' => $this->entry_text( 'continent' ),
+			'code' => $this->entry_text( 'continentcode' ),
 		];
 	}
 
@@ -216,14 +233,14 @@ class IP extends Base {
 	 * @return array|null
 	 */
 	public function get_country(): ?array {
-		if ( ! isset( $this->data[ $this->identifier ]['country'] ) ) {
+		if ( null === $this->entry_text( 'country' ) ) {
 			return null;
 		}
 
 		return [
-			'name'  => $this->data[ $this->identifier ]['country'] ?? null,
-			'code'  => $this->data[ $this->identifier ]['isocode'] ?? null,
-			'is_eu' => ( $this->data[ $this->identifier ]['europe'] ?? null ) === 1,
+			'name'  => $this->entry_text( 'country' ),
+			'code'  => $this->entry_text( 'isocode' ),
+			'is_eu' => 1 === ( $this->entry()['europe'] ?? null ),
 		];
 	}
 
@@ -233,13 +250,13 @@ class IP extends Base {
 	 * @return array|null
 	 */
 	public function get_region(): ?array {
-		if ( ! isset( $this->data[ $this->identifier ]['region'] ) ) {
+		if ( null === $this->entry_text( 'region' ) ) {
 			return null;
 		}
 
 		return [
-			'name' => $this->data[ $this->identifier ]['region'] ?? null,
-			'code' => $this->data[ $this->identifier ]['regioncode'] ?? null,
+			'name' => $this->entry_text( 'region' ),
+			'code' => $this->entry_text( 'regioncode' ),
 		];
 	}
 
@@ -249,7 +266,7 @@ class IP extends Base {
 	 * @return string|null
 	 */
 	public function get_city(): ?string {
-		return $this->data[ $this->identifier ]['city'] ?? null;
+		return $this->entry_text( 'city' );
 	}
 
 	/**
@@ -258,7 +275,7 @@ class IP extends Base {
 	 * @return string|null
 	 */
 	public function get_postcode(): ?string {
-		return $this->data[ $this->identifier ]['postcode'] ?? null;
+		return $this->entry_text( 'postcode' );
 	}
 
 	/**
@@ -267,13 +284,16 @@ class IP extends Base {
 	 * @return array|null
 	 */
 	public function get_coordinates(): ?array {
-		if ( ! isset( $this->data[ $this->identifier ]['latitude'] ) || ! isset( $this->data[ $this->identifier ]['longitude'] ) ) {
+		$latitude  = Field::float( $this->entry()['latitude'] ?? null );
+		$longitude = Field::float( $this->entry()['longitude'] ?? null );
+
+		if ( null === $latitude || null === $longitude ) {
 			return null;
 		}
 
 		return [
-			'latitude'  => (float) $this->data[ $this->identifier ]['latitude'],
-			'longitude' => (float) $this->data[ $this->identifier ]['longitude'],
+			'latitude'  => $latitude,
+			'longitude' => $longitude,
 		];
 	}
 
@@ -283,14 +303,16 @@ class IP extends Base {
 	 * @return array|null
 	 */
 	public function get_currency(): ?array {
-		if ( ! isset( $this->data[ $this->identifier ]['currency'] ) ) {
+		$currency = Field::map( $this->entry()['currency'] ?? null );
+
+		if ( null === $currency ) {
 			return null;
 		}
 
 		return [
-			'code'   => $this->data[ $this->identifier ]['currency']['code'] ?? null,
-			'name'   => $this->data[ $this->identifier ]['currency']['name'] ?? null,
-			'symbol' => $this->data[ $this->identifier ]['currency']['symbol'] ?? null,
+			'code'   => Field::text( $currency['code'] ?? null ),
+			'name'   => Field::text( $currency['name'] ?? null ),
+			'symbol' => Field::text( $currency['symbol'] ?? null ),
 		];
 	}
 
@@ -300,7 +322,7 @@ class IP extends Base {
 	 * @return string|null
 	 */
 	public function get_timezone(): ?string {
-		return $this->data[ $this->identifier ]['timezone'] ?? null;
+		return $this->entry_text( 'timezone' );
 	}
 
 	/**
@@ -321,19 +343,19 @@ class IP extends Base {
 	 * @return array|null Array of operator details or null if not available
 	 */
 	public function get_operator_details(): ?array {
-		if ( ! isset( $this->data[ $this->identifier ]['operator'] ) ) {
+		$operator = Field::map( $this->entry()['operator'] ?? null );
+
+		if ( null === $operator ) {
 			return null;
 		}
 
-		$operator = $this->data[ $this->identifier ]['operator'];
-
 		return [
-			'name'       => $operator['name'] ?? null,
+			'name'       => Field::text( $operator['name'] ?? null ),
 			'url'        => $operator['url'] ?? null,
-			'anonymity'  => $operator['anonymity'] ?? null,
-			'popularity' => $operator['popularity'] ?? null,
-			'protocols'  => $operator['protocols'] ?? [],
-			'policies'   => $operator['policies'] ?? [],
+			'anonymity'  => Field::text( $operator['anonymity'] ?? null ),
+			'popularity' => Field::text( $operator['popularity'] ?? null ),
+			'protocols'  => Field::map( $operator['protocols'] ?? null ) ?? [],
+			'policies'   => Field::map( $operator['policies'] ?? null ) ?? [],
 		];
 	}
 
@@ -343,7 +365,7 @@ class IP extends Base {
 	 * @return array|null Array of operator policies or null if not available
 	 */
 	public function get_operator_policies(): ?array {
-		return $this->data[ $this->identifier ]['operator']['policies'] ?? null;
+		return Field::map( Field::map( $this->entry()['operator'] ?? null )['policies'] ?? null );
 	}
 
 	/**

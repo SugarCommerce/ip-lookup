@@ -12,6 +12,7 @@ declare( strict_types=1 );
 
 namespace SugarCommerce\IpLookup\Providers\ProxyCheck\Response;
 
+use SugarCommerce\IpLookup\Support\Field;
 use SugarCommerce\Network\Remote\Response;
 
 /**
@@ -70,7 +71,7 @@ abstract class Base extends Response {
 	 * @return string|null
 	 */
 	public function get_node(): ?string {
-		return $this->data['node'] ?? null;
+		return Field::text( $this->data['node'] ?? null );
 	}
 
 	/**
@@ -79,11 +80,9 @@ abstract class Base extends Response {
 	 * @return float|null
 	 */
 	public function get_query_time(): ?float {
-		if ( ! isset( $this->data['query time'] ) ) {
-			return null;
-		}
+		$time = Field::text( $this->data['query time'] ?? null );
 
-		return (float) str_replace( 's', '', $this->data['query time'] );
+		return null === $time ? null : Field::float( str_replace( 's', '', $time ) );
 	}
 
 	/**
@@ -92,7 +91,7 @@ abstract class Base extends Response {
 	 * @return string|null
 	 */
 	public function get_status(): ?string {
-		return $this->data['status'] ?? null;
+		return Field::text( $this->data['status'] ?? null );
 	}
 
 	/**
@@ -101,7 +100,7 @@ abstract class Base extends Response {
 	 * @return string|null
 	 */
 	public function get_message(): ?string {
-		return $this->data['message'] ?? null;
+		return Field::text( $this->data['message'] ?? null );
 	}
 
 	/**
@@ -128,7 +127,7 @@ abstract class Base extends Response {
 	 * @return string|null Block reason or null if not blocked
 	 */
 	public function get_block_reason(): ?string {
-		return $this->data['block_reason'] ?? null;
+		return Field::text( $this->data['block_reason'] ?? null );
 	}
 
 	/**
@@ -137,6 +136,30 @@ abstract class Base extends Response {
 	 * @return array|null Array of block details or null if not available
 	 */
 	public function get_block_details(): ?array {
-		return $this->data['block_details'] ?? null;
+		return Field::map( $this->data['block_details'] ?? null );
+	}
+
+	/**
+	 * What the answer says about the address or email asked about.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array Empty when it says nothing.
+	 */
+	protected function entry(): array {
+		return Field::map( $this->data[ $this->identifier ] ?? null ) ?? array();
+	}
+
+	/**
+	 * One text field of the entry.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $key The field.
+	 *
+	 * @return string|null
+	 */
+	protected function entry_text( string $key ): ?string {
+		return Field::text( $this->entry()[ $key ] ?? null );
 	}
 }

@@ -12,6 +12,8 @@ declare( strict_types=1 );
 
 namespace SugarCommerce\IpLookup\Traits\ProxyCheck;
 
+use SugarCommerce\IpLookup\Support\Field;
+
 /**
  * Trait Verdict
  *
@@ -51,14 +53,14 @@ trait Verdict {
 
 			if ( isset( $entry['operator'] ) && is_array( $entry['operator'] ) ) {
 				$response['block_details'] = array(
-					'name'       => $entry['operator']['name'] ?? '',
-					'anonymity'  => $entry['operator']['anonymity'] ?? '',
-					'popularity' => $entry['operator']['popularity'] ?? '',
+					'name'       => Field::text( $entry['operator']['name'] ?? null ) ?? '',
+					'anonymity'  => Field::text( $entry['operator']['anonymity'] ?? null ) ?? '',
+					'popularity' => Field::text( $entry['operator']['popularity'] ?? null ) ?? '',
 				);
 			}
 		}
 
-		if ( isset( $entry['risk'] ) && (int) $entry['risk'] > self::BLOCK_RISK ) {
+		if ( ( Field::int( $entry['risk'] ?? null ) ?? 0 ) > self::BLOCK_RISK ) {
 			$response['block'] = 'yes';
 
 			if ( 'na' === $response['block_reason'] ) {
@@ -78,7 +80,9 @@ trait Verdict {
 	 * @return array
 	 */
 	private function apply_country_rules( array $response, array $entry ): array {
-		if ( ! isset( $entry['country'] ) ) {
+		$country = Field::text( $entry['country'] ?? null );
+
+		if ( null === $country ) {
 			// Nothing to judge a country by. A proxy is still a proxy, but a
 			// clean answer is no answer when the client judges by country.
 			if ( 'no' === $response['block'] && array() !== $this->blocked_countries ) {
@@ -89,7 +93,7 @@ trait Verdict {
 			return $response;
 		}
 
-		$names = array( strtoupper( (string) $entry['country'] ), strtoupper( (string) ( $entry['isocode'] ?? '' ) ) );
+		$names = array( strtoupper( $country ), strtoupper( Field::text( $entry['isocode'] ?? null ) ?? '' ) );
 
 		if ( 'no' === $response['block'] && array() !== array_intersect( $names, $this->blocked_countries ) ) {
 			$response['block']        = 'yes';

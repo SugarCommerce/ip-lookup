@@ -12,6 +12,8 @@ declare( strict_types=1 );
 
 namespace SugarCommerce\IpLookup\Providers\IPQualityScore\Response;
 
+use SugarCommerce\IpLookup\Support\Field;
+
 /**
  * IP Response Class
  *
@@ -26,7 +28,7 @@ class IP extends Base {
 	 * @return float|null
 	 */
 	public function get_fraud_score(): ?float {
-		return isset( $this->data['fraud_score'] ) ? (float) $this->data['fraud_score'] : null;
+		return Field::float( $this->data['fraud_score'] ?? null );
 	}
 
 	/**
@@ -44,7 +46,7 @@ class IP extends Base {
 	 * @return string|null
 	 */
 	public function get_host(): ?string {
-		return $this->data['host'] ?? null;
+		return Field::text( $this->data['host'] ?? null );
 	}
 
 	/**
@@ -53,7 +55,7 @@ class IP extends Base {
 	 * @return string|null
 	 */
 	public function get_isp(): ?string {
-		return $this->data['ISP'] ?? null;
+		return Field::text( $this->data['ISP'] ?? null );
 	}
 
 	/**
@@ -62,7 +64,7 @@ class IP extends Base {
 	 * @return string|null
 	 */
 	public function get_organization(): ?string {
-		return $this->data['organization'] ?? null;
+		return Field::text( $this->data['organization'] ?? null );
 	}
 
 	/**
@@ -71,7 +73,7 @@ class IP extends Base {
 	 * @return int|null
 	 */
 	public function get_asn(): ?int {
-		return isset( $this->data['ASN'] ) ? (int) $this->data['ASN'] : null;
+		return Field::int( $this->data['ASN'] ?? null );
 	}
 
 	/**
@@ -80,7 +82,7 @@ class IP extends Base {
 	 * @return string|null
 	 */
 	public function get_country_code(): ?string {
-		return $this->data['country_code'] ?? null;
+		return Field::text( $this->data['country_code'] ?? null );
 	}
 
 	/**
@@ -89,7 +91,7 @@ class IP extends Base {
 	 * @return string|null
 	 */
 	public function get_city(): ?string {
-		return $this->data['city'] ?? null;
+		return Field::text( $this->data['city'] ?? null );
 	}
 
 	/**
@@ -98,7 +100,7 @@ class IP extends Base {
 	 * @return string|null
 	 */
 	public function get_region(): ?string {
-		return $this->data['region'] ?? null;
+		return Field::text( $this->data['region'] ?? null );
 	}
 
 	/**
@@ -107,7 +109,7 @@ class IP extends Base {
 	 * @return string|null
 	 */
 	public function get_timezone(): ?string {
-		return $this->data['timezone'] ?? null;
+		return Field::text( $this->data['timezone'] ?? null );
 	}
 
 	/**
@@ -116,7 +118,7 @@ class IP extends Base {
 	 * @return float|null
 	 */
 	public function get_latitude(): ?float {
-		return isset( $this->data['latitude'] ) ? (float) $this->data['latitude'] : null;
+		return Field::float( $this->data['latitude'] ?? null );
 	}
 
 	/**
@@ -125,7 +127,7 @@ class IP extends Base {
 	 * @return float|null
 	 */
 	public function get_longitude(): ?float {
-		return isset( $this->data['longitude'] ) ? (float) $this->data['longitude'] : null;
+		return Field::float( $this->data['longitude'] ?? null );
 	}
 
 	/**
@@ -134,7 +136,7 @@ class IP extends Base {
 	 * @return string|null
 	 */
 	public function get_zip_code(): ?string {
-		return $this->data['zip_code'] ?? null;
+		return Field::text( $this->data['zip_code'] ?? null );
 	}
 
 	/**
@@ -152,7 +154,7 @@ class IP extends Base {
 	 * @return string|null
 	 */
 	public function get_connection_type(): ?string {
-		return $this->data['connection_type'] ?? null;
+		return Field::text( $this->data['connection_type'] ?? null );
 	}
 
 	/**
@@ -170,7 +172,7 @@ class IP extends Base {
 	 * @return string|null
 	 */
 	public function get_abuse_velocity(): ?string {
-		return $this->data['abuse_velocity'] ?? null;
+		return Field::text( $this->data['abuse_velocity'] ?? null );
 	}
 
 	/**
@@ -287,7 +289,7 @@ class IP extends Base {
 	 * @return string|null
 	 */
 	public function get_operating_system(): ?string {
-		return $this->data['operating_system'] ?? null;
+		return Field::text( $this->data['operating_system'] ?? null );
 	}
 
 	/**
@@ -296,7 +298,7 @@ class IP extends Base {
 	 * @return string|null
 	 */
 	public function get_browser(): ?string {
-		return $this->data['browser'] ?? null;
+		return Field::text( $this->data['browser'] ?? null );
 	}
 
 	/**
@@ -305,7 +307,7 @@ class IP extends Base {
 	 * @return string|null
 	 */
 	public function get_device_brand(): ?string {
-		return $this->data['device_brand'] ?? null;
+		return Field::text( $this->data['device_brand'] ?? null );
 	}
 
 	/**
@@ -314,7 +316,7 @@ class IP extends Base {
 	 * @return string|null
 	 */
 	public function get_device_model(): ?string {
-		return $this->data['device_model'] ?? null;
+		return Field::text( $this->data['device_model'] ?? null );
 	}
 
 	/**
@@ -323,7 +325,7 @@ class IP extends Base {
 	 * @return array|null
 	 */
 	public function get_transaction_details(): ?array {
-		return $this->data['transaction_details'] ?? null;
+		return Field::map( $this->data['transaction_details'] ?? null );
 	}
 
 	/**
