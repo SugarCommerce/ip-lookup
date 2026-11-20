@@ -351,7 +351,7 @@ class IP extends Base {
 
 		return [
 			'name'       => Field::text( $operator['name'] ?? null ),
-			'url'        => $operator['url'] ?? null,
+			'url'        => Field::url( $operator['url'] ?? null ),
 			'anonymity'  => Field::text( $operator['anonymity'] ?? null ),
 			'popularity' => Field::text( $operator['popularity'] ?? null ),
 			'protocols'  => Field::map( $operator['protocols'] ?? null ) ?? [],

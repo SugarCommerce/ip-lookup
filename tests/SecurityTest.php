@@ -10,6 +10,7 @@ declare( strict_types=1 );
 
 namespace SugarCommerce\IpLookup\Tests;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use SugarCommerce\IpLookup\Providers\AbuseIPDB;
 use SugarCommerce\IpLookup\Providers\IPInfo;
@@ -195,6 +196,53 @@ final class SecurityTest extends TestCase {
 
 		$this->assertSame( 'AU', $client->get_ip_info( '1.1.1.1' )->get_country() );
 		$this->assertSame( 2, FakeHttp::count() );
+	}
+
+	/**
+	 * A VPN operator's link is the provider's to give: only an http or
+	 * https address comes through, so a page that prints it as a link
+	 * cannot be made to run script.
+	 *
+	 * @param string      $url      What the provider sent.
+	 * @param string|null $expected What comes through.
+	 *
+	 * @return void
+	 */
+	#[DataProvider( 'operator_urls' )]
+	public function test_proxycheck_operator_url_is_a_web_address( string $url, ?string $expected ): void {
+		FakeHttp::json(
+			array(
+				'status'  => 'ok',
+				'8.8.8.8' => array(
+					'proxy'    => 'yes',
+					'type'     => 'VPN',
+					'operator' => array(
+						'name' => 'Mullvad',
+						'url'  => $url,
+					),
+				),
+			)
+		);
+
+		$this->assertSame( $expected, ( new ProxyCheck( 'key' ) )->check_ip( '8.8.8.8' )->get_operator_details()['url'] );
+	}
+
+	/**
+	 * @return array<string, array{string, string|null}>
+	 */
+	public static function operator_urls(): array {
+		return array(
+			'https'           => array( 'https://mullvad.net/', 'https://mullvad.net/' ),
+			'http'            => array( 'http://example.com/vpn', 'http://example.com/vpn' ),
+			'javascript'      => array( 'javascript:alert(document.cookie)', null ),
+			'javascript case' => array( ' JavaScript:alert(1)', null ),
+			'javascript host' => array( 'javascript://example.com/%0Aalert(1)', null ),
+			'ftp'             => array( 'ftp://example.com/', null ),
+			'data'            => array( 'data:text/html,<script>alert(1)</script>', null ),
+			'no host'         => array( 'https:///etc/passwd', null ),
+			'quote'           => array( 'https://example.com/"onmouseover="alert(1)', null ),
+			'relative'        => array( '//evil.example/', null ),
+		);
 	}
 }
 
