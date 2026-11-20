@@ -46,20 +46,12 @@ class IPQualityScore extends Service implements Provider {
 	/**
 	 * The API.
 	 */
-	private const string API_BASE = 'https://ipqualityscore.com/api/json/';
+	private const string API_BASE = 'https://www.ipqualityscore.com/api/json/';
 
 	/**
-	 * How each endpoint is called. Every other endpoint is a POST to
-	 * `{base}{endpoint}/{key}`.
-	 *
-	 * `value` is the parameter that goes into the path after the key.
+	 * The endpoints asked with GET. Every other endpoint is a POST.
 	 */
-	private const array ENDPOINTS = array(
-		'ip' => array(
-			'method' => 'GET',
-			'value'  => 'ip',
-		),
-	);
+	private const array GET_ENDPOINTS = array( 'ip' );
 
 	/**
 	 * How suspicious to be, 0 to 3.
@@ -277,7 +269,7 @@ class IPQualityScore extends Service implements Provider {
 	 * @return array|WP_Error The decoded answer.
 	 */
 	private function call( string $endpoint, array $params = array() ): array|WP_Error {
-		$config = self::ENDPOINTS[ $endpoint ] ?? array( 'method' => 'POST' );
+		$method = in_array( $endpoint, self::GET_ENDPOINTS, true ) ? 'GET' : 'POST';
 		$params = array_merge(
 			array(
 				'strictness'                 => $this->strictness,
@@ -290,22 +282,18 @@ class IPQualityScore extends Service implements Provider {
 			$params
 		);
 
-		$url = self::API_BASE . $endpoint . '/' . rawurlencode( $this->api_key );
+		// The key goes in a header, never the URL: a URL is what HTTP logs,
+		// debugging plugins and proxies keep.
+		$url  = self::API_BASE . $endpoint;
+		$args = array( 'headers' => array( 'IPQS-KEY' => $this->api_key ) );
 
-		if ( isset( $config['value'] ) ) {
-			$url .= '/' . (string) ( $params[ $config['value'] ] ?? '' );
-			unset( $params[ $config['value'] ] );
-		}
-
-		$args = array();
-
-		if ( 'GET' === $config['method'] ) {
-			$url .= empty( $params ) ? '' : '?' . http_build_query( $params );
+		if ( 'GET' === $method ) {
+			$url .= '?' . http_build_query( $params );
 		} else {
 			$args['body'] = $params;
 		}
 
-		return $this->answer( $this->request( $config['method'], $url, $args ) );
+		return $this->answer( $this->request( $method, $url, $args ) );
 	}
 
 	/**

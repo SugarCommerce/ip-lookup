@@ -26,8 +26,8 @@ final class IPQualityScoreTest extends TestCase {
 	}
 
 	/**
-	 * An address check goes to ip/{key}/{ip} with the strictness and the
-	 * visitor's agent and language.
+	 * An address check goes to ip with the address, the strictness and the
+	 * visitor's agent and language, and the key in a header.
 	 *
 	 * @return void
 	 */
@@ -63,7 +63,9 @@ final class IPQualityScoreTest extends TestCase {
 		$this->assertSame( 3, $client->get_strictness() );
 
 		$url = FakeHttp::last()['url'];
-		$this->assertStringStartsWith( 'https://ipqualityscore.com/api/json/ip/secret/8.8.8.8?', $url );
+		$this->assertStringStartsWith( 'https://www.ipqualityscore.com/api/json/ip?', $url );
+		$this->assertStringContainsString( '&ip=8.8.8.8', $url );
+		$this->assertSame( 'secret', FakeHttp::last()['args']['headers']['IPQS-KEY'] );
 		$this->assertStringContainsString( 'strictness=3', $url );
 		$this->assertStringContainsString( 'user_agent=Mozilla%2F5.0+Test', $url );
 		$this->assertStringContainsString( 'user_language=en-GB', $url );
@@ -109,7 +111,7 @@ final class IPQualityScoreTest extends TestCase {
 
 		$email = $client->validate_email( 'a@example.com' );
 		$this->assertTrue( $email->is_disposable() );
-		$this->assertSame( 'https://ipqualityscore.com/api/json/email/k', FakeHttp::last()['url'] );
+		$this->assertSame( 'https://www.ipqualityscore.com/api/json/email', FakeHttp::last()['url'] );
 		$this->assertSame( 'a@example.com', FakeHttp::last()['args']['body']['email'] );
 
 

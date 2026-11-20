@@ -283,5 +283,27 @@ final class SecurityTest extends TestCase {
 
 		$this->assertSame( 'Rate limited', ( new AbuseIPDB( 'key' ) )->check_ip( '8.8.8.8' )->get_error_message() );
 	}
+
+	/**
+	 * IPQualityScore's key goes in a header, not the URL: a URL is what
+	 * HTTP logs, debugging plugins and proxies keep.
+	 *
+	 * @return void
+	 */
+	public function test_ipqualityscore_key_is_not_in_the_url(): void {
+		FakeHttp::json( array( 'success' => true ) );
+		FakeHttp::json( array( 'success' => true ) );
+		$client = new IPQualityScore( 'top-secret-key' );
+
+		$client->check_ip( '8.8.8.8' );
+
+		$this->assertStringNotContainsString( 'top-secret-key', FakeHttp::last()['url'] );
+		$this->assertSame( 'top-secret-key', FakeHttp::last()['args']['headers']['IPQS-KEY'] );
+
+		$client->validate_email( 'a@example.com' );
+
+		$this->assertStringNotContainsString( 'top-secret-key', FakeHttp::last()['url'] );
+		$this->assertSame( 'top-secret-key', FakeHttp::last()['args']['headers']['IPQS-KEY'] );
+	}
 }
 
