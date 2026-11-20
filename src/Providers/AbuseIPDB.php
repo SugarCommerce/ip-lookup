@@ -16,6 +16,7 @@ use SugarCommerce\IpLookup\Providers\AbuseIPDB\Check;
 use SugarCommerce\IpLookup\Result;
 use SugarCommerce\IpLookup\Provider;
 use SugarCommerce\IpLookup\Support\Address;
+use SugarCommerce\IpLookup\Support\Field;
 use SugarCommerce\Network\Remote\Service;
 use WP_Error;
 
@@ -206,11 +207,11 @@ class AbuseIPDB extends Service implements Provider {
 
 		// An error comes back as an `errors` list in place of `data`.
 		if ( $response['status'] >= 400 || isset( $response['data']['errors'] ) ) {
-			$first = (array) ( $response['data']['errors'][0] ?? array() );
+			$first = Field::map( $response['data']['errors'][0] ?? null ) ?? array();
 
 			return $this->error(
 				'api_error',
-				(string) ( $first['detail'] ?? __( 'AbuseIPDB API error.', 'sugarcommerce' ) ),
+				Field::message( $first['detail'] ?? null, __( 'AbuseIPDB API error.', 'sugarcommerce' ) ),
 				array( 'status' => $response['status'] )
 			);
 		}

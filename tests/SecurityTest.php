@@ -244,5 +244,44 @@ final class SecurityTest extends TestCase {
 			'relative'        => array( '//evil.example/', null ),
 		);
 	}
+
+	/**
+	 * A provider's refusal becomes an error message as plain text, one line
+	 * and clipped: markup in it cannot reach a notice that prints it, and a
+	 * message that is not text is no message.
+	 *
+	 * @return void
+	 */
+	public function test_provider_error_text_is_plain(): void {
+		FakeHttp::json(
+			array(
+				'status'  => 'error',
+				'message' => "<img src=x onerror=alert(1)>Bad\n key " . str_repeat( 'x', 500 ),
+			)
+		);
+
+		$message = ( new ProxyCheck( 'k' ) )->check_ip( '8.8.8.8' )->get_error_message();
+
+		$this->assertStringStartsWith( 'Bad key x', $message );
+		$this->assertStringNotContainsString( '<', $message );
+		$this->assertLessThanOrEqual( 301, mb_strlen( $message ) );
+
+		FakeHttp::json( array( 'error' => array( 'message' => array( 'nested' ) ) ), 200 );
+
+		$this->assertSame( 'Unknown IPinfo error.', ( new IPInfo( 'token' ) )->get_ip_info( '8.8.8.8' )->get_error_message() );
+
+		FakeHttp::json(
+			array(
+				'success' => false,
+				'errors'  => array( '<b>Invalid</b> key', array( 'nested' ) ),
+			)
+		);
+
+		$this->assertSame( 'Invalid key', ( new IPQualityScore( 'secret' ) )->check_ip( '8.8.8.8' )->get_error_message() );
+
+		FakeHttp::json( array( 'errors' => array( array( 'detail' => '<b>Rate</b> limited' ) ) ), 429 );
+
+		$this->assertSame( 'Rate limited', ( new AbuseIPDB( 'key' ) )->check_ip( '8.8.8.8' )->get_error_message() );
+	}
 }
 

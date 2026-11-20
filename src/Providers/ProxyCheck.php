@@ -17,6 +17,7 @@ use SugarCommerce\IpLookup\Providers\ProxyCheck\Response\IP;
 use SugarCommerce\IpLookup\Result;
 use SugarCommerce\IpLookup\Provider;
 use SugarCommerce\IpLookup\Support\Address;
+use SugarCommerce\IpLookup\Support\Field;
 use SugarCommerce\IpLookup\Traits\ProxyCheck\Countries;
 use SugarCommerce\IpLookup\Traits\ProxyCheck\Flags;
 use SugarCommerce\IpLookup\Traits\ProxyCheck\Verdict;
@@ -265,7 +266,7 @@ class ProxyCheck extends Service implements Provider {
 		$data = $this->json( $response );
 
 		if ( ! is_wp_error( $data ) && in_array( $data['status'] ?? '', array( 'error', 'denied' ), true ) ) {
-			return $this->error( 'api_error', (string) ( $data['message'] ?? __( 'ProxyCheck refused the request.', 'sugarcommerce' ) ) );
+			return $this->error( 'api_error', Field::message( $data['message'] ?? null, __( 'ProxyCheck refused the request.', 'sugarcommerce' ) ) );
 		}
 
 		return $data;

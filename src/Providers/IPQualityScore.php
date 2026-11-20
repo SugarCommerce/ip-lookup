@@ -17,6 +17,7 @@ use SugarCommerce\IpLookup\Providers\IPQualityScore\Response\IP;
 use SugarCommerce\IpLookup\Result;
 use SugarCommerce\IpLookup\Provider;
 use SugarCommerce\IpLookup\Support\Address;
+use SugarCommerce\IpLookup\Support\Field;
 use SugarCommerce\Network\Request;
 use SugarCommerce\Network\Remote\Service;
 use WP_Error;
@@ -323,11 +324,13 @@ class IPQualityScore extends Service implements Provider {
 		}
 
 		if ( isset( $data['errors'] ) && array() !== $data['errors'] ) {
-			return $this->error( 'api_error', is_array( $data['errors'] ) ? implode( ' ', array_map( 'strval', $data['errors'] ) ) : (string) $data['errors'] );
+			$errors = is_array( $data['errors'] ) ? implode( ' ', array_filter( array_map( array( Field::class, 'text' ), $data['errors'] ) ) ) : $data['errors'];
+
+			return $this->error( 'api_error', Field::message( $errors, __( 'IPQualityScore refused the request.', 'sugarcommerce' ) ) );
 		}
 
 		if ( false === ( $data['success'] ?? null ) ) {
-			return $this->error( 'api_error', (string) ( $data['message'] ?? __( 'IPQualityScore refused the request.', 'sugarcommerce' ) ) );
+			return $this->error( 'api_error', Field::message( $data['message'] ?? null, __( 'IPQualityScore refused the request.', 'sugarcommerce' ) ) );
 		}
 
 		return $data;

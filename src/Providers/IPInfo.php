@@ -16,6 +16,7 @@ use SugarCommerce\IpLookup\Providers\IPInfo\Response;
 use SugarCommerce\IpLookup\Result;
 use SugarCommerce\IpLookup\Provider;
 use SugarCommerce\IpLookup\Support\Address;
+use SugarCommerce\IpLookup\Support\Field;
 use SugarCommerce\Network\Remote\Service;
 use WP_Error;
 
@@ -303,7 +304,7 @@ class IPInfo extends Service implements Provider {
 		$data = $this->json( $response );
 
 		if ( ! is_wp_error( $data ) && isset( $data['error'] ) ) {
-			return $this->error( 'api_error', (string) ( $data['error']['message'] ?? __( 'Unknown IPinfo error.', 'sugarcommerce' ) ) );
+			return $this->error( 'api_error', Field::message( Field::map( $data['error'] )['message'] ?? $data['error'], __( 'Unknown IPinfo error.', 'sugarcommerce' ) ) );
 		}
 
 		return $data;
