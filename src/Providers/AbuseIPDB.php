@@ -15,6 +15,7 @@ namespace SugarCommerce\IpLookup\Providers;
 use SugarCommerce\IpLookup\Providers\AbuseIPDB\Check;
 use SugarCommerce\IpLookup\Result;
 use SugarCommerce\IpLookup\Provider;
+use SugarCommerce\IpLookup\Support\Address;
 use SugarCommerce\Network\Remote\Service;
 use WP_Error;
 
@@ -110,15 +111,17 @@ class AbuseIPDB extends Service implements Provider {
 	 * @return Check|WP_Error
 	 */
 	public function check_ip( string $ip ): Check|WP_Error {
-		$ip = trim( $ip );
-
 		if ( '' === $this->api_key ) {
 			return $this->error( 'missing_key', __( 'AbuseIPDB needs an API key.', 'sugarcommerce' ) );
 		}
 
-		if ( ! self::is_lookupable( $ip ) ) {
-			return $this->invalid_ip( $ip );
+		$address = Address::canonical( $ip );
+
+		if ( null === $address ) {
+			return $this->invalid_ip( trim( $ip ) );
 		}
+
+		$ip = $address;
 
 		// The score is worked out over the window, so two windows ask two
 		// different questions and must not share an answer.
@@ -146,7 +149,7 @@ class AbuseIPDB extends Service implements Provider {
 
 		return new Result(
 			self::ID,
-			trim( $ip ),
+			Address::canonical( $ip ) ?? trim( $ip ),
 			array(
 				'risk_score'      => $check->get_confidence_score(),
 				'is_abusive'      => $check->is_abusive( self::ABUSIVE_SCORE ),

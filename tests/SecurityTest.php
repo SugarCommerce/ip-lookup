@@ -11,6 +11,8 @@ declare( strict_types=1 );
 namespace SugarCommerce\IpLookup\Tests;
 
 use PHPUnit\Framework\TestCase;
+use SugarCommerce\IpLookup\Providers\AbuseIPDB;
+use SugarCommerce\IpLookup\Providers\IPInfo;
 use SugarCommerce\IpLookup\Providers\IPQualityScore;
 use SugarCommerce\IpLookup\Providers\ProxyCheck;
 use SugarCommerce\IpLookup\Result;
@@ -111,5 +113,62 @@ final class SecurityTest extends TestCase {
 		$this->assertNull( $check->get_host() );
 		$this->assertNull( $check->get_transaction_details() );
 		$this->assertSame( 'Unknown', $check->get_risk_level() );
+	}
+
+	/**
+	 * An IPv6 address spelled out at length is the address ProxyCheck
+	 * answers about in its short form: the verdict is read from that
+	 * answer, so a proxy is not let through for the spelling.
+	 *
+	 * @return void
+	 */
+	public function test_proxycheck_verdict_does_not_depend_on_the_spelling(): void {
+		FakeHttp::json(
+			array(
+				'status'               => 'ok',
+				'2001:4860:4860::8888' => array(
+					'proxy' => 'yes',
+					'type'  => 'VPN',
+				),
+			)
+		);
+
+		$client = new ProxyCheck( 'key' );
+		$check  = $client->check_ip( '2001:4860:4860:0:0:0:0:8888' );
+
+		$this->assertTrue( $check->should_block() );
+		$this->assertSame( 'vpn', $check->get_block_reason() );
+		$this->assertStringContainsString( rawurlencode( '2001:4860:4860::8888' ), FakeHttp::last()['url'] );
+
+		// Every spelling is one question, asked once.
+		$client->check_ip( '2001:4860:4860::8888' );
+		$client->check_ip( '[2001:4860:4860:0000::8888]' );
+
+		$this->assertSame( 1, FakeHttp::count() );
+	}
+
+	/**
+	 * An IPv4 address carried in an IPv6 one is asked about as the IPv4
+	 * address it is, by every provider.
+	 *
+	 * @return void
+	 */
+	public function test_mapped_ipv4_is_asked_as_ipv4(): void {
+		FakeHttp::json( array( 'success' => true ) );
+		( new IPQualityScore( 'secret' ) )->check_ip( '::ffff:8.8.8.8' );
+
+		$this->assertStringContainsString( '8.8.8.8', FakeHttp::last()['url'] );
+		$this->assertStringNotContainsString( 'ffff', FakeHttp::last()['url'] );
+
+		FakeHttp::json( array( 'ip' => '8.8.8.8' ) );
+		$result = ( new IPInfo( 'token' ) )->lookup( '::FFFF:8.8.8.8' );
+
+		$this->assertSame( '8.8.8.8', $result->get_ip() );
+		$this->assertStringEndsWith( '/8.8.8.8', FakeHttp::last()['url'] );
+
+		FakeHttp::json( array( 'data' => array( 'abuseConfidenceScore' => 0 ) ) );
+		( new AbuseIPDB( 'key' ) )->check_ip( '::ffff:8.8.8.8' );
+
+		$this->assertStringContainsString( 'ipAddress=8.8.8.8', FakeHttp::last()['url'] );
 	}
 }

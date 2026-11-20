@@ -16,6 +16,7 @@ use SugarCommerce\IpLookup\Providers\ProxyCheck\Response\DisposableEmail;
 use SugarCommerce\IpLookup\Providers\ProxyCheck\Response\IP;
 use SugarCommerce\IpLookup\Result;
 use SugarCommerce\IpLookup\Provider;
+use SugarCommerce\IpLookup\Support\Address;
 use SugarCommerce\IpLookup\Traits\ProxyCheck\Countries;
 use SugarCommerce\IpLookup\Traits\ProxyCheck\Flags;
 use SugarCommerce\IpLookup\Traits\ProxyCheck\Verdict;
@@ -83,11 +84,13 @@ class ProxyCheck extends Service implements Provider {
 	 * @return IP|WP_Error
 	 */
 	public function check_ip( string $ip, array $options = array() ): IP|WP_Error {
-		$ip = trim( $ip );
+		$address = Address::canonical( $ip );
 
-		if ( ! self::is_lookupable( $ip ) ) {
-			return $this->invalid_ip( $ip );
+		if ( null === $address ) {
+			return $this->invalid_ip( trim( $ip ) );
 		}
+
+		$ip = $address;
 
 		$params = array_merge( $this->parameters, $options );
 
@@ -109,7 +112,7 @@ class ProxyCheck extends Service implements Provider {
 	 * @return array<string, IP>|WP_Error Keyed by address.
 	 */
 	public function check_ips( array $ips, array $options = array() ): array|WP_Error {
-		$ips = array_values( array_unique( array_filter( array_map( 'trim', array_map( 'strval', $ips ) ), array( self::class, 'is_lookupable' ) ) ) );
+		$ips = Address::canonical_list( $ips );
 
 		if ( empty( $ips ) ) {
 			return $this->error( 'invalid_ips', __( 'No public IP addresses to check.', 'sugarcommerce' ) );
@@ -207,7 +210,7 @@ class ProxyCheck extends Service implements Provider {
 
 		return new Result(
 			self::ID,
-			trim( $ip ),
+			Address::canonical( $ip ) ?? trim( $ip ),
 			array(
 				'risk_score'      => $check->get_risk_score(),
 				'is_proxy'        => $check->is_proxy(),

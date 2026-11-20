@@ -15,6 +15,7 @@ namespace SugarCommerce\IpLookup\Providers;
 use SugarCommerce\IpLookup\Providers\IPInfo\Response;
 use SugarCommerce\IpLookup\Result;
 use SugarCommerce\IpLookup\Provider;
+use SugarCommerce\IpLookup\Support\Address;
 use SugarCommerce\Network\Remote\Service;
 use WP_Error;
 
@@ -60,11 +61,13 @@ class IPInfo extends Service implements Provider {
 	 * @return Response|WP_Error
 	 */
 	public function get_ip_info( string $ip ): Response|WP_Error {
-		$ip = trim( $ip );
+		$address = Address::canonical( $ip );
 
-		if ( ! self::is_lookupable( $ip ) ) {
-			return $this->invalid_ip( $ip );
+		if ( null === $address ) {
+			return $this->invalid_ip( trim( $ip ) );
 		}
+
+		$ip = $address;
 
 		$data = $this->remember( $ip, fn () => $this->json_answer( $this->request( 'GET', self::API_BASE . rawurlencode( $ip ), $this->auth() ) ) );
 
@@ -87,7 +90,7 @@ class IPInfo extends Service implements Provider {
 	 * @return array<string, Response>|WP_Error Keyed by address.
 	 */
 	public function get_batch_info( array $ips, int $batch_size = self::BATCH_MAX_SIZE, bool $filter = false, int $timeout = self::BATCH_TIMEOUT ): array|WP_Error {
-		$ips = array_values( array_unique( array_filter( array_map( 'trim', array_map( 'strval', $ips ) ), array( self::class, 'is_lookupable' ) ) ) );
+		$ips = Address::canonical_list( $ips );
 
 		if ( empty( $ips ) ) {
 			return $this->error( 'invalid_ips', __( 'No public IP addresses to look up.', 'sugarcommerce' ) );
@@ -153,11 +156,13 @@ class IPInfo extends Service implements Provider {
 	 * @return string|WP_Error
 	 */
 	public function get_field( string $ip, string $field ): string|WP_Error {
-		$ip = trim( $ip );
+		$address = Address::canonical( $ip );
 
-		if ( ! self::is_lookupable( $ip ) ) {
-			return $this->invalid_ip( $ip );
+		if ( null === $address ) {
+			return $this->invalid_ip( trim( $ip ) );
 		}
+
+		$ip = $address;
 
 		$field = trim( $field, " /\t\n\r\0\x0B" );
 
@@ -241,7 +246,7 @@ class IPInfo extends Service implements Provider {
 
 		return new Result(
 			self::ID,
-			trim( $ip ),
+			Address::canonical( $ip ) ?? trim( $ip ),
 			array(
 				'is_proxy'        => $privacy?->is_proxy(),
 				'is_vpn'          => $privacy?->is_vpn(),

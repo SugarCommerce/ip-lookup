@@ -16,6 +16,7 @@ use SugarCommerce\IpLookup\Providers\IPQualityScore\Response\Email;
 use SugarCommerce\IpLookup\Providers\IPQualityScore\Response\IP;
 use SugarCommerce\IpLookup\Result;
 use SugarCommerce\IpLookup\Provider;
+use SugarCommerce\IpLookup\Support\Address;
 use SugarCommerce\Network\Request;
 use SugarCommerce\Network\Remote\Service;
 use WP_Error;
@@ -174,11 +175,13 @@ class IPQualityScore extends Service implements Provider {
 	 * @return IP|WP_Error
 	 */
 	public function check_ip( string $ip, array $params = array() ): IP|WP_Error {
-		$ip = trim( $ip );
+		$address = Address::canonical( $ip );
 
-		if ( ! self::is_lookupable( $ip ) ) {
-			return $this->invalid_ip( $ip );
+		if ( null === $address ) {
+			return $this->invalid_ip( trim( $ip ) );
 		}
+
+		$ip = $address;
 
 		return $this->cached( IP::class, 'ip_' . $ip, 'ip', array( 'ip' => $ip ) + $params );
 	}
@@ -223,7 +226,7 @@ class IPQualityScore extends Service implements Provider {
 
 		return new Result(
 			self::ID,
-			trim( $ip ),
+			Address::canonical( $ip ) ?? trim( $ip ),
 			array(
 				'risk_score'      => $check->get_fraud_score(),
 				'is_proxy'        => $check->is_proxy(),

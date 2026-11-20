@@ -12,6 +12,7 @@ declare( strict_types=1 );
 
 namespace SugarCommerce\IpLookup;
 
+use SugarCommerce\IpLookup\Support\Address;
 use WP_Error;
 
 /**
@@ -74,8 +75,7 @@ final class Lookup {
 	 * @return Result|WP_Error
 	 */
 	public function ask( Provider $provider, string $ip ): Result|WP_Error {
-		$ip  = trim( $ip );
-		$key = spl_object_id( $provider ) . '|' . $ip;
+		$key = spl_object_id( $provider ) . '|' . ( Address::canonical( $ip ) ?? trim( $ip ) );
 
 		return $this->answers[ $key ] ??= $provider->lookup( $ip );
 	}
