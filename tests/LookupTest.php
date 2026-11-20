@@ -11,9 +11,9 @@ namespace SugarCommerce\IpLookup\Tests;
 
 use PHPUnit\Framework\TestCase;
 use SugarCommerce\IpLookup\Lookup;
+use SugarCommerce\IpLookup\Models\Result;
 use SugarCommerce\IpLookup\Providers\AbuseIPDB;
 use SugarCommerce\IpLookup\Providers\IPQualityScore;
-use SugarCommerce\IpLookup\Result;
 use SugarCommerce\IpLookup\Tests\Support\FakeHttp;
 
 /**

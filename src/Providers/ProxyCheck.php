@@ -12,9 +12,9 @@ declare( strict_types=1 );
 
 namespace SugarCommerce\IpLookup\Providers;
 
-use SugarCommerce\IpLookup\Providers\ProxyCheck\Response\DisposableEmail;
-use SugarCommerce\IpLookup\Providers\ProxyCheck\Response\IP;
-use SugarCommerce\IpLookup\Result;
+use SugarCommerce\IpLookup\Models\ProxyCheck\Response\DisposableEmail;
+use SugarCommerce\IpLookup\Models\ProxyCheck\Response\IP;
+use SugarCommerce\IpLookup\Models\Result;
 use SugarCommerce\IpLookup\Provider;
 use SugarCommerce\IpLookup\Support\Address;
 use SugarCommerce\IpLookup\Support\Field;

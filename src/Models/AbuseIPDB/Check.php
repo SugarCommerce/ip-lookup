@@ -10,9 +10,9 @@
 
 declare( strict_types=1 );
 
-namespace SugarCommerce\IpLookup\Providers\AbuseIPDB;
+namespace SugarCommerce\IpLookup\Models\AbuseIPDB;
 
-use SugarCommerce\Network\Remote\Response;
+use SugarCommerce\Network\Models\Remote\Response;
 
 /**
  * Class Check

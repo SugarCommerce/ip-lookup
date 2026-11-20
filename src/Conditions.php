@@ -14,11 +14,16 @@ namespace SugarCommerce\IpLookup;
 
 use SugarCommerce\Conditions\Conditions as Rules;
 use SugarCommerce\Conditions\Helpers\Request as RuleRequest;
+use SugarCommerce\IpLookup\Models\AbuseIPDB\Check;
+use SugarCommerce\IpLookup\Models\IPInfo\Response;
+use SugarCommerce\IpLookup\Models\IPQualityScore\Response\Email;
+use SugarCommerce\IpLookup\Models\IPQualityScore\Response\IP;
+use SugarCommerce\IpLookup\Models\ProxyCheck\Response\IP as ProxyCheckIP;
+use SugarCommerce\IpLookup\Models\Result;
 use SugarCommerce\IpLookup\Providers\AbuseIPDB;
 use SugarCommerce\IpLookup\Providers\IPInfo;
 use SugarCommerce\IpLookup\Providers\IPQualityScore;
 use SugarCommerce\IpLookup\Providers\ProxyCheck;
-use SugarCommerce\IpLookup\Providers\ProxyCheck\Response\IP as ProxyCheckIP;
 use SugarCommerce\IpLookup\Traits\Conditions\Builders;
 use WP_Error;
 
@@ -196,13 +201,13 @@ final class Conditions {
 	 */
 	private static function ipqualityscore( IPQualityScore $client ): array {
 		$group = __( 'IPQualityScore', 'sugarcommerce' );
-		$check = function ( array $args ) use ( $client ): ?Providers\IPQualityScore\Response\IP {
+		$check = function ( array $args ) use ( $client ): ?IP {
 			$ip     = self::ip( $args );
 			$answer = '' === $ip ? null : self::answer( $client, 'ip', $ip, fn () => $client->check_ip( $ip ) );
 
 			return null === $answer || is_wp_error( $answer ) ? null : $answer;
 		};
-		$email = function ( array $args ) use ( $client ): ?Providers\IPQualityScore\Response\Email {
+		$email = function ( array $args ) use ( $client ): ?Email {
 			$answer = self::answer( $client, 'email', (string) $args['email'], fn () => $client->validate_email( (string) $args['email'] ) );
 
 			return is_wp_error( $answer ) ? null : $answer;
@@ -265,7 +270,7 @@ final class Conditions {
 	 */
 	private static function ipinfo( IPInfo $client ): array {
 		$group   = __( 'IPinfo', 'sugarcommerce' );
-		$info    = function ( array $args ) use ( $client ): ?Providers\IPInfo\Response {
+		$info    = function ( array $args ) use ( $client ): ?Response {
 			$ip     = self::ip( $args );
 			$answer = '' === $ip ? null : self::answer( $client, 'ip', $ip, fn () => $client->get_ip_info( $ip ) );
 
@@ -313,7 +318,7 @@ final class Conditions {
 	 */
 	private static function abuseipdb( AbuseIPDB $client ): array {
 		$group = __( 'AbuseIPDB', 'sugarcommerce' );
-		$check = function ( array $args ) use ( $client ): ?Providers\AbuseIPDB\Check {
+		$check = function ( array $args ) use ( $client ): ?Check {
 			$ip     = self::ip( $args );
 			$answer = '' === $ip ? null : self::answer( $client, 'ip', $ip, fn () => $client->check_ip( $ip ) );
 

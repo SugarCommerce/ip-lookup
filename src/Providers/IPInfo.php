@@ -12,8 +12,8 @@ declare( strict_types=1 );
 
 namespace SugarCommerce\IpLookup\Providers;
 
-use SugarCommerce\IpLookup\Providers\IPInfo\Response;
-use SugarCommerce\IpLookup\Result;
+use SugarCommerce\IpLookup\Models\IPInfo\Response;
+use SugarCommerce\IpLookup\Models\Result;
 use SugarCommerce\IpLookup\Provider;
 use SugarCommerce\IpLookup\Support\Address;
 use SugarCommerce\IpLookup\Support\Field;

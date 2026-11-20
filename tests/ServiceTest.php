@@ -12,8 +12,8 @@ namespace SugarCommerce\IpLookup\Tests;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use SugarCommerce\IpLookup\Models\AbuseIPDB\Check;
 use SugarCommerce\IpLookup\Providers\AbuseIPDB;
-use SugarCommerce\IpLookup\Providers\AbuseIPDB\Check;
 use SugarCommerce\IpLookup\Tests\Support\FakeHttp;
 use WP_Error;
 

@@ -13,12 +13,12 @@ use PHPUnit\Framework\TestCase;
 use SugarCommerce\Conditions\Conditions as Rules;
 use SugarCommerce\Conditions\Registry;
 use SugarCommerce\IpLookup\Conditions;
+use SugarCommerce\IpLookup\Models\Result;
 use SugarCommerce\IpLookup\Provider;
 use SugarCommerce\IpLookup\Providers\AbuseIPDB;
 use SugarCommerce\IpLookup\Providers\IPInfo;
 use SugarCommerce\IpLookup\Providers\IPQualityScore;
 use SugarCommerce\IpLookup\Providers\ProxyCheck;
-use SugarCommerce\IpLookup\Result;
 use SugarCommerce\IpLookup\Tests\Support\FakeHttp;
 use WP_Error;
 

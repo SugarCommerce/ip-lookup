@@ -10,9 +10,9 @@
 
 declare( strict_types=1 );
 
-namespace SugarCommerce\IpLookup\Providers\IPInfo;
+namespace SugarCommerce\IpLookup\Models\IPInfo;
 
-use SugarCommerce\Network\Remote\Response;
+use SugarCommerce\Network\Models\Remote\Response;
 
 /**
  * Class Privacy

@@ -178,6 +178,18 @@ the rule does not match, so "VPN is no" cannot pass because the service was
 down. Each answer is asked for once per request, however many conditions
 read it.
 
+## Layout
+
+* `src/Lookup.php`, `Provider.php` and `src/Providers/`: asking one service or
+  several. `src/Conditions.php` (with `src/Traits/Conditions/`) builds the
+  rules a shop owner picks from.
+* `src/Models/`: data shapes and nothing that does work. `Result.php` is the
+  common answer; `IPInfo/`, `AbuseIPDB/`, `IPQualityScore/` and `ProxyCheck/`
+  hold each service's own answer, read field by field.
+* `src/Traits/ProxyCheck/` and `src/Traits/ProxyCheckIP/`: the jobs the larger
+  ProxyCheck classes are split into. `src/Support/`: the address and field
+  readers every provider shares.
+
 ## Security
 
 * An address is asked about only when it is public, and always in its one standard spelling: a VPN written out long-hand still meets ProxyCheck's verdict, and costs one request, not one per spelling

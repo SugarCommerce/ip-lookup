@@ -10,8 +10,8 @@ declare( strict_types=1 );
 namespace SugarCommerce\IpLookup\Tests\Providers;
 
 use PHPUnit\Framework\TestCase;
+use SugarCommerce\IpLookup\Models\Result;
 use SugarCommerce\IpLookup\Providers\AbuseIPDB;
-use SugarCommerce\IpLookup\Result;
 use SugarCommerce\IpLookup\Tests\Support\FakeHttp;
 
 /**

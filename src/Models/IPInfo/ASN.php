@@ -1,6 +1,6 @@
 <?php
 /**
- * IPinfo company
+ * IPinfo asn
  *
  * @package   SugarCommerce\IpLookup
  * @copyright Copyright (c) 2026, ArrayPress Limited
@@ -10,21 +10,34 @@
 
 declare( strict_types=1 );
 
-namespace SugarCommerce\IpLookup\Providers\IPInfo;
+namespace SugarCommerce\IpLookup\Models\IPInfo;
 
-use SugarCommerce\Network\Remote\Response;
+use SugarCommerce\Network\Models\Remote\Response;
 
 /**
- * Class Company
+ * Class ASN
  *
- * The company the address is registered to. Business plan and above.
+ * The network the address belongs to. Basic plan and above.
  *
  * @since 1.0.0
  */
-class Company extends Response {
+class ASN extends Response {
 
 	/**
-	 * The company's name.
+	 * The ASN, written `AS15169`.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string|null
+	 */
+	public function get_asn(): ?string {
+		$value = $this->data['asn'] ?? null;
+
+		return is_scalar( $value ) && '' !== (string) $value ? (string) $value : null;
+	}
+
+	/**
+	 * The network's name.
 	 *
 	 * @since 1.0.0
 	 *
@@ -37,7 +50,7 @@ class Company extends Response {
 	}
 
 	/**
-	 * The company's domain.
+	 * The network's domain.
 	 *
 	 * @since 1.0.0
 	 *
@@ -50,7 +63,20 @@ class Company extends Response {
 	}
 
 	/**
-	 * The company's kind: `isp`, `hosting`, `business` or `education`.
+	 * The announced route, e.g. `8.8.8.0/24`.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string|null
+	 */
+	public function get_route(): ?string {
+		$value = $this->data['route'] ?? null;
+
+		return is_scalar( $value ) && '' !== (string) $value ? (string) $value : null;
+	}
+
+	/**
+	 * The network's kind: `isp`, `hosting`, `business` or `education`.
 	 *
 	 * @since 1.0.0
 	 *

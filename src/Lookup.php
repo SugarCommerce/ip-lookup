@@ -12,6 +12,7 @@ declare( strict_types=1 );
 
 namespace SugarCommerce\IpLookup;
 
+use SugarCommerce\IpLookup\Models\Result;
 use SugarCommerce\IpLookup\Support\Address;
 use WP_Error;
 

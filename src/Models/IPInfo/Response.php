@@ -10,10 +10,10 @@
 
 declare( strict_types=1 );
 
-namespace SugarCommerce\IpLookup\Providers\IPInfo;
+namespace SugarCommerce\IpLookup\Models\IPInfo;
 
 use SugarCommerce\Geo\Countries;
-use SugarCommerce\Network\Remote\Response as Base;
+use SugarCommerce\Network\Models\Remote\Response as Base;
 
 /**
  * Class Response

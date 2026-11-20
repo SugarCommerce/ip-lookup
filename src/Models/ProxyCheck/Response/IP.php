@@ -10,7 +10,7 @@
 
 declare( strict_types=1 );
 
-namespace SugarCommerce\IpLookup\Providers\ProxyCheck\Response;
+namespace SugarCommerce\IpLookup\Models\ProxyCheck\Response;
 
 use SugarCommerce\IpLookup\Support\Field;
 use SugarCommerce\IpLookup\Traits\ProxyCheckIP\Formatted;

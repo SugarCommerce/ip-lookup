@@ -10,10 +10,10 @@
 
 declare( strict_types=1 );
 
-namespace SugarCommerce\IpLookup\Providers\IPQualityScore\Response;
+namespace SugarCommerce\IpLookup\Models\IPQualityScore\Response;
 
 use SugarCommerce\IpLookup\Support\Field;
-use SugarCommerce\Network\Remote\Response;
+use SugarCommerce\Network\Models\Remote\Response;
 
 /**
  * Class Base

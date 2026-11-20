@@ -11,7 +11,7 @@ namespace SugarCommerce\IpLookup\Tests;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use SugarCommerce\IpLookup\Result;
+use SugarCommerce\IpLookup\Models\Result;
 
 /**
  * The common answer: what it keeps, how it cleans, and null as no answer.
