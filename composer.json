@@ -24,7 +24,8 @@
     "require": {
         "php": ">=8.3",
         "sugarcommerce/geo": "dev-main",
-        "sugarcommerce/network": "dev-main"
+        "sugarcommerce/network": "dev-main",
+        "sugarcommerce/plugin": "dev-main"
     },
     "require-dev": {
         "phpcompatibility/phpcompatibility-wp": "^2.1",

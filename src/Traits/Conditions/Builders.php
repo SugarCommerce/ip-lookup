@@ -12,9 +12,8 @@ declare( strict_types=1 );
 
 namespace SugarCommerce\IpLookup\Traits\Conditions;
 
-use SugarCommerce\Conditions\Helpers\Geo as GeoOptions;
-use SugarCommerce\Conditions\Operators;
 use SugarCommerce\Geo\Countries;
+use SugarCommerce\Plugin\Build;
 
 /**
  * Trait Builders
@@ -112,7 +111,7 @@ trait Builders {
 			'label'         => $label,
 			'group'         => $group,
 			'type'          => 'tags',
-			'operators'     => Operators::tags_exact(),
+			'operators'     => self::rules( 'Operators' )::tags_exact(),
 			'description'   => $description,
 			'compare_value' => $compare,
 			'required_args' => array(),
@@ -137,7 +136,7 @@ trait Builders {
 			'type'          => 'select',
 			'multiple'      => true,
 			'options'       => $options,
-			'operators'     => Operators::collection_any_none(),
+			'operators'     => self::rules( 'Operators' )::collection_any_none(),
 			'description'   => $description,
 			'compare_value' => $compare,
 			'required_args' => array(),
@@ -157,7 +156,7 @@ trait Builders {
 			$group,
 			__( 'Country', 'sugarcommerce' ),
 			__( 'The country the address is in. Useful beside the billing country, or for a second opinion on the visitor\'s.', 'sugarcommerce' ),
-			fn () => GeoOptions::get_country_options(),
+			fn () => self::rules( 'Helpers\\Geo' )::get_country_options(),
 			function ( array $args ) use ( $compare ): ?string {
 				$code = $compare( $args );
 
@@ -203,5 +202,21 @@ trait Builders {
 		}
 
 		return $options;
+	}
+
+	/**
+	 * A class of sugarcommerce/conditions, in this build.
+	 *
+	 * The package is suggested, not required, so it is never imported: a
+	 * plugin that bundles this one without it would otherwise reach
+	 * SugarCart's unprefixed copy. Build::sibling() names the copy beside
+	 * this one, prefixed as it is.
+	 *
+	 * @param string $class_name The class, after `Conditions\`: `Operators`.
+	 *
+	 * @return string
+	 */
+	private static function rules( string $class_name ): string {
+		return Build::sibling( __NAMESPACE__, 4, 'Conditions\\' . $class_name );
 	}
 }

@@ -12,8 +12,6 @@ declare( strict_types=1 );
 
 namespace SugarCommerce\IpLookup;
 
-use SugarCommerce\Conditions\Conditions as Rules;
-use SugarCommerce\Conditions\Helpers\Request as RuleRequest;
 use SugarCommerce\IpLookup\Models\AbuseIPDB\Check;
 use SugarCommerce\IpLookup\Models\IPInfo\Response;
 use SugarCommerce\IpLookup\Models\IPQualityScore\Response\Email;
@@ -74,7 +72,7 @@ final class Conditions {
 	public static function register( string $set_id, Provider ...$providers ): void {
 		foreach ( $providers as $provider ) {
 			foreach ( self::definitions( $provider ) as $id => $config ) {
-				Rules::add( $set_id, $id, $config );
+				self::rules( 'Conditions' )::add( $set_id, $id, $config );
 			}
 		}
 	}
@@ -129,7 +127,9 @@ final class Conditions {
 			}
 		}
 
-		return (string) RuleRequest::get_ip( $args );
+		$request = self::rules( 'Helpers\\Request' );
+
+		return class_exists( $request ) ? (string) $request::get_ip( $args ) : '';
 	}
 
 	/**
