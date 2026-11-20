@@ -29,7 +29,7 @@ sugarcommerce/conditions rule builder.
 * Fall back to a second service only when the first fails
 * Check an email too: IPQualityScore's validation, ProxyCheck's disposable-address check
 * Cache answers and remember failures, per key, with the lifetimes you choose
-* Give owners rules like "Proxy is yes" or "VPN Operator is any of Mullvad", under the ids wp-conditions used
+* Give owners rules like "Proxy is yes" or "VPN Operator is any of Mullvad", under ids that stay put
 
 ## Installation
 
@@ -58,6 +58,8 @@ if ( $result->is_anonymous() || $result->is_high_risk( 80 ) ) {
 ## The providers
 
 Each is a client for the address and email questions, and a `Provider` for the common answer.
+Its answer classes sit beside it in `Providers/<Name>/`; where a class has
+more than one job, each job is a trait in `Traits/<Class>/`.
 
 | Class | Key | Common answer |
 |---|---|---|
@@ -163,7 +165,7 @@ use SugarCommerce\IpLookup\Conditions;
 Conditions::register( 'fraud_rule', new ProxyCheck( $key ), new IPQualityScore( $other_key ) );
 ```
 
-The ids are wp-conditions' own -- `proxycheck_is_vpn`, `ipqs_fraud_score`,
+The ids are fixed -- `proxycheck_is_vpn`, `ipqs_fraud_score`,
 `ipinfo_is_hosting`, `abuseipdb_confidence_score` and the rest -- so rules
 saved against them keep working. A provider of your own gets `{id}_risk_score`, `{id}_is_proxy`, `{id}_is_vpn`,
 `{id}_is_tor`, `{id}_is_hosting` and `{id}_country`.
@@ -176,77 +178,17 @@ the rule does not match, so "VPN is no" cannot pass because the service was
 down. Each answer is asked for once per request, however many conditions
 read it.
 
-## Moving from arraypress/wp-*
+## Security
 
-This library is `wp-abuseipdb`, `wp-ipinfo`, `wp-ipqualityscore`,
-`wp-proxycheck` in one, with the service conditions wp-conditions had.
-`wp-maxmind-minfraud` and the endpoints nothing used were left out (below).
-
-| Was | Now |
-|---|---|
-| `ArrayPress\AbuseIPDB\Client` | `SugarCommerce\IpLookup\Providers\AbuseIPDB` |
-| `ArrayPress\AbuseIPDB\Response\Check` | `Providers\AbuseIPDB\Check` |
-| `ArrayPress\IPInfo\Client` | `Providers\IPInfo` |
-| `ArrayPress\IPInfo\Response` | `Providers\IPInfo\Response` |
-| `ArrayPress\IPInfo\Info\{ASN, Company, Privacy, Abuse, Domains}` | `Providers\IPInfo\{...}` |
-| `ArrayPress\IPQualityScore\Client` | `Providers\IPQualityScore` |
-| `ArrayPress\IPQualityScore\Response\{IP, Email, Base}` | `Providers\IPQualityScore\Response\{...}` |
-| `ArrayPress\ProxyCheck\Client` (with the `Parameters` trait) | `Providers\ProxyCheck` |
-| `ArrayPress\ProxyCheck\Response\Client\{IP, DisposableEmail, Base}` | `Providers\ProxyCheck\Response\{...}` |
-| `ArrayPress\ProxyCheck\Client`'s `Dashboard` trait and `Response\Dashboard\*` (usage, detections, tags, queries, the lists) | removed: unused; the ProxyCheck dashboard does it |
-| IPQualityScore `validate_phone()`, `check_leaked_data()`, `scan_url()`, `scan_file_for_malware()`, `lookup_malware_hash()`, `scan_remote_file()`, `validate_transaction()` and `Transaction`, `report_*()`, `get_request_list()`, `get_country_list()`, the allow and block list calls, `get_credit_usage()`, and their `Response\*` | removed: unused; only the IP and email checks stay |
-| `ArrayPress\MaxMind\MinFraud\Client`, `Response\Score` and the `minfraud_ip_risk` condition | removed: unused, and Stripe Radar scores the same payment |
-| `SugarCommerce\IpLookup\{Service, Response}` | `SugarCommerce\Network\Remote\{Service, Response}` (sugarcommerce/network) -- one copy, shared with geocoding |
-| `ArrayPress\Conditions\Conditions\Services\*`, `ArrayPress\Conditions\Clients\*` | `Conditions::register( $set, ...$clients )` |
-
-Building a client:
-
-| Was | Now |
-|---|---|
-| `new AbuseIPDB\Client( $key, [ 'cache_enabled' => …, 'cache_ttl' => …, 'cache_prefix' => …, 'failure_ttl' => …, 'max_age_days' => … ] )` | `new AbuseIPDB( $key, [ 'cache' => …, 'cache_ttl' => …, 'failure_ttl' => …, 'max_age_days' => … ] )` |
-| `new IPInfo\Client( $key, $enable_cache, $expiration )` | `new IPInfo( $key, [ 'cache' => $enable_cache, 'cache_ttl' => $expiration ] )` |
-| `new IPQualityScore\Client( $key, $enable_cache, $expiration )` | `new IPQualityScore( $key, [ 'cache' => …, 'cache_ttl' => … ] )` |
-| `new ProxyCheck\Client( $key, $enable_cache, $expiration, $prefix )` | `new ProxyCheck( $key, [ 'cache' => …, 'cache_ttl' => … ] )` |
-| `set_cache_expiration()`, `get_cache_expiration()` | `set_cache_ttl()`, `get_cache_ttl()` |
-| `set_cache_prefix()`, `get_cache_prefix()`, `cache_prefix` | gone: every transient starts `iplookup_{id}_` |
-| `get_cache_settings()` | `is_cache_enabled()`, `get_cache_ttl()`, `get_failure_ttl()` |
-
-Reading an answer:
-
-| Was | Now |
-|---|---|
-| `Check::to_array()`, `Score::to_array()` | unchanged |
-| IPinfo `Response::get_all()`, ProxyCheck `IP::get_all()` | `to_array()` |
-| IPQualityScore `get_raw_data()` | `to_array()` |
-| IPinfo `$response->all`, IPQualityScore `$response->field` | `$response->field`, or `get( 'field' )` |
-| IPinfo `Response::get_continent()` (a `Continent`) | an array: `[ 'code' => 'EU', 'name' => 'Europe' ]` -- ProxyCheck's shape |
-| IPinfo `Response::get_country_flag()` (a `CountryFlag`) | the emoji |
-| IPinfo `Response::get_country_currency()` (a `CountryCurrency`) | `SugarCommerce\Money\Currencies::for_country( $response->get_country() )` |
-| IPinfo `Utils\Locations::*` | `SugarCommerce\Geo\Countries` (names, continents, EU, flags) |
-| IPinfo `Utils\IP::is_valid_for_lookup( $ip )`, `is_bogon()` | `IPInfo::is_lookupable( $ip )` (from network's `Remote\Service`), `! SugarCommerce\Network\IP::is_public( $ip )` |
-| IPinfo `Utils\IP::is_valid()`, `is_ipv4()`, `is_ipv6()`, `in_range()` | `SugarCommerce\Network\IP::is_valid()`, `is_valid_ipv4()`, `is_valid_ipv6()`, `is_in_range()` |
-| IPinfo `Utils\IP::get_bogon_networks()` | gone: sugarcommerce/network keeps the ranges `is_public()` refuses |
-
-The service conditions:
-
-| Was | Now |
-|---|---|
-| `$args['proxycheck_api_key']`, `ipqs_api_key`, `ipinfo_api_key`, `abuseipdb_api_key` | the key is the client's, handed to `register()` |
-| `required_args => [ 'ip', '…_api_key' ]` | none: the address comes from the request when there is no `ip` argument |
-| a failed lookup answered `false`, `0` or `''` | null -- no answer -- so the rule does not match |
-| `Clients\*::reset_cache()`, `clear_cache()` | `Conditions::reset()` |
-
-Answers that changed:
-
-* Every client refuses an address that is not public before asking. Only IPinfo did.
-* Error codes start with the provider's id. IPinfo, IPQualityScore and ProxyCheck said `api_error`, `json_error`, `http_error`, `invalid_ip` with no prefix.
-* IPQualityScore's `success: false` (a bad key, no credits) is an error. It was cached as an answer with every field empty.
-* ProxyCheck's `status: denied` is an error, like `error`.
-* ProxyCheck's verdict without a country: a proxy is still blocked. It became `na` whenever ProxyCheck sent no country, and it now does only for a clean address when countries are blocked.
-* IPinfo's `get_field()` reads the plain-text answer IPinfo sends. It tried to decode it as JSON and failed. A field name is checked before it goes into the URL.
-* IPinfo's `get_latitude()` and `get_longitude()` read `loc` too, as `get_coordinates()` did.
-* IPinfo's `get_batch_info()` keeps each answer through the cache as a single lookup does.
-* Text domain `arraypress` is `sugarcommerce`.
+* An address is asked about only when it is public, and always in its one standard spelling: a VPN written out long-hand still meets ProxyCheck's verdict, and costs one request, not one per spelling
+* Every field of an answer is read as its type: a malformed or hostile answer is no answer, never a fatal error on the checkout
+* A link a provider sends -- ProxyCheck's VPN operator URL -- comes through only as an http or https address, never `javascript:`
+* A provider's own error text becomes a plain-text, one-line, clipped message, so no markup reaches a notice that prints it
+* An IPinfo batch answer is cached only for the addresses that were asked about
+* Keys stay out of URLs: AbuseIPDB, IPinfo and IPQualityScore get them in a header; only ProxyCheck, which takes no other way, gets a `key` query parameter, over HTTPS
+* A key is never part of an error message or error data, and is a `#[\SensitiveParameter]` everywhere it is passed, so stack traces leave it out
+* Every endpoint is a fixed HTTPS address, and every request has a timeout -- an IPinfo batch's held to 1-30 seconds
+* Answers are cached per provider, per key and per question, so two accounts or two questions never share one
 
 ## Requirements
 
