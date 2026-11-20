@@ -53,6 +53,11 @@ class IPInfo extends Service implements Provider {
 	private const int BATCH_TIMEOUT = 5;
 
 	/**
+	 * The longest a batch request may take: 0 would be no timeout at all.
+	 */
+	private const int BATCH_TIMEOUT_MAX = 30;
+
+	/**
 	 * Everything IPinfo knows about an address.
 	 *
 	 * @since 1.0.0
@@ -86,7 +91,7 @@ class IPInfo extends Service implements Provider {
 	 * @param string[] $ips        The addresses.
 	 * @param int      $batch_size Addresses per request, at most 1,000.
 	 * @param bool     $filter     Ask for one field only (IPinfo's `filter=1`).
-	 * @param int      $timeout    Seconds each request may take.
+	 * @param int      $timeout    Seconds each request may take, 1 to 30.
 	 *
 	 * @return array<string, Response>|WP_Error Keyed by address.
 	 */
@@ -119,7 +124,7 @@ class IPInfo extends Service implements Provider {
 						array(
 							'headers' => array( 'Content-Type' => 'application/json' ),
 							'body'    => (string) wp_json_encode( $batch ),
-							'timeout' => $timeout,
+							'timeout' => max( 1, min( self::BATCH_TIMEOUT_MAX, $timeout ) ),
 						)
 					)
 				)

@@ -305,5 +305,21 @@ final class SecurityTest extends TestCase {
 		$this->assertStringNotContainsString( 'top-secret-key', FakeHttp::last()['url'] );
 		$this->assertSame( 'top-secret-key', FakeHttp::last()['args']['headers']['IPQS-KEY'] );
 	}
+
+	/**
+	 * A batch's timeout is held to 1-30 seconds: 0 is no timeout at all to
+	 * cURL, and a request that never ends holds a PHP worker with it.
+	 *
+	 * @return void
+	 */
+	public function test_ipinfo_batch_timeout_is_bounded(): void {
+		$client = new IPInfo( 'token', array( 'cache' => false ) );
+
+		$client->get_batch_info( array( '8.8.8.8' ), 1000, false, 0 );
+		$this->assertSame( 1, FakeHttp::last()['args']['timeout'] );
+
+		$client->get_batch_info( array( '8.8.8.8' ), 1000, false, 600 );
+		$this->assertSame( 30, FakeHttp::last()['args']['timeout'] );
+	}
 }
 
