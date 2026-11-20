@@ -31,7 +31,7 @@ class IP extends Base {
 	/**
 	 * Default risk threshold for high risk determination
 	 */
-	private const RISK_HIGH_THRESHOLD = 70;
+	private const int RISK_HIGH_THRESHOLD = 70;
 
 	/**
 	 * Get the IP address that was checked

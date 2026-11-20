@@ -29,26 +29,26 @@ use WP_Error;
  */
 class IPInfo extends Service implements Provider {
 
-	protected const ID = 'ipinfo';
+	protected const string ID = 'ipinfo';
 
-	protected const NAME = 'IPinfo';
+	protected const string NAME = 'IPinfo';
 
-	protected const CACHE_GROUP = 'iplookup';
+	protected const string CACHE_GROUP = 'iplookup';
 
 	/**
 	 * The API.
 	 */
-	private const API_BASE = 'https://ipinfo.io/';
+	private const string API_BASE = 'https://ipinfo.io/';
 
 	/**
 	 * The most addresses one batch request takes.
 	 */
-	public const BATCH_MAX_SIZE = 1000;
+	public const int BATCH_MAX_SIZE = 1000;
 
 	/**
 	 * Seconds a batch request may take, by default.
 	 */
-	private const BATCH_TIMEOUT = 5;
+	private const int BATCH_TIMEOUT = 5;
 
 	/**
 	 * Everything IPinfo knows about an address.
@@ -223,6 +223,7 @@ class IPInfo extends Service implements Provider {
 	 *
 	 * @return Result|WP_Error
 	 */
+	#[\Override]
 	public function lookup( string $ip ): Result|WP_Error {
 		$info = $this->get_ip_info( $ip );
 

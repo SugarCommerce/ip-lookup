@@ -34,7 +34,7 @@ final class Result {
 	/**
 	 * The answers this result can hold, and the type of each.
 	 */
-	private const FIELDS = array(
+	private const array FIELDS = array(
 		'risk_score'      => 'int',
 		'is_proxy'        => 'bool',
 		'is_vpn'          => 'bool',

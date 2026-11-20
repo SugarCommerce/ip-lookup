@@ -32,21 +32,21 @@ use WP_Error;
  */
 class AbuseIPDB extends Service implements Provider {
 
-	protected const ID = 'abuseipdb';
+	protected const string ID = 'abuseipdb';
 
-	protected const NAME = 'AbuseIPDB';
+	protected const string NAME = 'AbuseIPDB';
 
-	protected const CACHE_GROUP = 'iplookup';
+	protected const string CACHE_GROUP = 'iplookup';
 
 	/**
 	 * The Check endpoint.
 	 */
-	private const CHECK_ENDPOINT = 'https://api.abuseipdb.com/api/v2/check';
+	private const string CHECK_ENDPOINT = 'https://api.abuseipdb.com/api/v2/check';
 
 	/**
 	 * AbuseIPDB's own line for "high confidence of abuse".
 	 */
-	public const ABUSIVE_SCORE = 75;
+	public const int ABUSIVE_SCORE = 75;
 
 	/**
 	 * How many days of reports the score is worked out over, 1 to 365.
@@ -136,6 +136,7 @@ class AbuseIPDB extends Service implements Provider {
 	 *
 	 * @return Result|WP_Error
 	 */
+	#[\Override]
 	public function lookup( string $ip ): Result|WP_Error {
 		$check = $this->check_ip( $ip );
 

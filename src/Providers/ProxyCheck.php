@@ -44,33 +44,33 @@ class ProxyCheck extends Service implements Provider {
 	use Countries;
 	use Verdict;
 
-	protected const ID = 'proxycheck';
+	protected const string ID = 'proxycheck';
 
-	protected const NAME = 'ProxyCheck';
+	protected const string NAME = 'ProxyCheck';
 
-	protected const CACHE_GROUP = 'iplookup';
+	protected const string CACHE_GROUP = 'iplookup';
 
-	protected const CACHE_TTL = 600;
+	protected const int CACHE_TTL = 600;
 
 	/**
 	 * The API.
 	 */
-	private const API_BASE = 'https://proxycheck.io/v2/';
+	private const string API_BASE = 'https://proxycheck.io/v2/';
 
 	/**
 	 * Addresses per batch request without a key.
 	 */
-	public const BATCH_MAX_SIZE = 100;
+	public const int BATCH_MAX_SIZE = 100;
 
 	/**
 	 * Addresses per batch request with one.
 	 */
-	public const BATCH_MAX_SIZE_REGISTERED = 1000;
+	public const int BATCH_MAX_SIZE_REGISTERED = 1000;
 
 	/**
 	 * The risk above which an address is blocked.
 	 */
-	public const BLOCK_RISK = 70;
+	public const int BLOCK_RISK = 70;
 
 	/**
 	 * Check an address.
@@ -184,6 +184,7 @@ class ProxyCheck extends Service implements Provider {
 	 *
 	 * @return Result|WP_Error
 	 */
+	#[\Override]
 	public function lookup( string $ip ): Result|WP_Error {
 		$check = $this->check_ip(
 			$ip,

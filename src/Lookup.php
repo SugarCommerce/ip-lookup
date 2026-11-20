@@ -32,7 +32,7 @@ final class Lookup {
 	 *
 	 * @var Provider[]
 	 */
-	private array $providers;
+	private readonly array $providers;
 
 	/**
 	 * Answers already given in this request, by provider and address.

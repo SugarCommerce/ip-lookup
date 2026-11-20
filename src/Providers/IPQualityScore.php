@@ -35,16 +35,16 @@ use WP_Error;
  */
 class IPQualityScore extends Service implements Provider {
 
-	protected const ID = 'ipqualityscore';
+	protected const string ID = 'ipqualityscore';
 
-	protected const NAME = 'IPQualityScore';
+	protected const string NAME = 'IPQualityScore';
 
-	protected const CACHE_GROUP = 'iplookup';
+	protected const string CACHE_GROUP = 'iplookup';
 
 	/**
 	 * The API.
 	 */
-	private const API_BASE = 'https://ipqualityscore.com/api/json/';
+	private const string API_BASE = 'https://ipqualityscore.com/api/json/';
 
 	/**
 	 * How each endpoint is called. Every other endpoint is a POST to
@@ -52,7 +52,7 @@ class IPQualityScore extends Service implements Provider {
 	 *
 	 * `value` is the parameter that goes into the path after the key.
 	 */
-	private const ENDPOINTS = array(
+	private const array ENDPOINTS = array(
 		'ip' => array(
 			'method' => 'GET',
 			'value'  => 'ip',
@@ -211,6 +211,7 @@ class IPQualityScore extends Service implements Provider {
 	 *
 	 * @return Result|WP_Error
 	 */
+	#[\Override]
 	public function lookup( string $ip ): Result|WP_Error {
 		$check = $this->check_ip( $ip );
 

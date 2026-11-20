@@ -35,9 +35,9 @@ abstract class Base extends Response {
 	/**
 	 * Block status constants
 	 */
-	protected const BLOCK_YES = 'yes';
-	protected const BLOCK_NO = 'no';
-	protected const BLOCK_NA = 'na';
+	protected const string BLOCK_YES = 'yes';
+	protected const string BLOCK_NO = 'no';
+	protected const string BLOCK_NA = 'na';
 
 
 	/**
