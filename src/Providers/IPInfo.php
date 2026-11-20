@@ -128,15 +128,19 @@ class IPInfo extends Service implements Provider {
 				return $answer;
 			}
 
-			foreach ( $answer as $ip => $data ) {
+			// Only the addresses asked about: an answer naming others must
+			// not plant answers for them in the cache.
+			foreach ( $batch as $ip ) {
+				$data = $answer[ $ip ] ?? null;
+
 				if ( ! is_array( $data ) ) {
 					continue;
 				}
 
 				// Kept as a single lookup would have kept it; none was cached.
-				$this->remember( (string) $ip, static fn () => $data );
+				$this->remember( $ip, static fn () => $data );
 
-				$results[ (string) $ip ] = new Response( $data );
+				$results[ $ip ] = new Response( $data );
 			}
 		}
 

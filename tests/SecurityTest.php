@@ -171,4 +171,30 @@ final class SecurityTest extends TestCase {
 
 		$this->assertStringContainsString( 'ipAddress=8.8.8.8', FakeHttp::last()['url'] );
 	}
+
+	/**
+	 * An IPinfo batch answer is kept only for the addresses asked about:
+	 * one that names others cannot plant answers for them in the cache.
+	 *
+	 * @return void
+	 */
+	public function test_ipinfo_batch_keeps_only_what_was_asked(): void {
+		FakeHttp::json(
+			array(
+				'8.8.8.8' => array( 'country' => 'US' ),
+				'1.1.1.1' => array( 'country' => 'KP' ),
+			)
+		);
+
+		$client  = new IPInfo( 'token' );
+		$results = $client->get_batch_info( array( '8.8.8.8' ) );
+
+		$this->assertSame( array( '8.8.8.8' ), array_keys( $results ) );
+
+		FakeHttp::json( array( 'country' => 'AU' ) );
+
+		$this->assertSame( 'AU', $client->get_ip_info( '1.1.1.1' )->get_country() );
+		$this->assertSame( 2, FakeHttp::count() );
+	}
 }
+
